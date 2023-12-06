@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['user_name'])) {
+  // Người dùng chưa đăng nhập, chuyển hướng về trang đăng nhập
+  header("Location: login.php");
+  exit();
+}
+ ?>
 <!DOCTYPE html>
 <html class="wide wow-animation" lang="en">
   <head>
@@ -87,7 +96,7 @@
                           </div>
                         </div>
                         <div class="cart-inline-footer">
-                          <div class="group-sm"><a class="button button-md button-default-outline-2 button-wapasha" href="#">Go to cart</a><a class="button button-md button-primary button-pipaluk" href="Order.php">Checkout</a></div>
+                          <div class="group-sm"><a class="button button-md button-primary button-pipaluk" href="Order.php" style="width: 100%;">Checkout</a></div>
                         </div>
                       </div>
                     </div><a class="rd-navbar-basket rd-navbar-basket-mobile fl-bigmug-line-shopping198" href="#"><span>2</span></a>
@@ -104,8 +113,12 @@
                     </div>
                     <!-- RD Navbar Nav-->
                     <ul class="rd-navbar-nav">
-                      <li class="rd-nav-item active"><a class="rd-nav-link" href="index.php">TRANG CHỦ</a>
+                      <?php
+                      echo '
+                      <li class="rd-nav-item active"><a class="rd-nav-link" href="index.php?id='.$_SESSION["user_id"].'">TRANG CHỦ</a>
                       </li>
+                      '
+                       ?>
                       <li class="rd-nav-item"><a class="rd-nav-link" href="#KM">KHUYẾN MÃI</a>
                       </li>
                       <li class="rd-nav-item"><a class="rd-nav-link" href="#SP">SẢN PHẨM</a>
@@ -131,26 +144,39 @@
                   <div class="rd-navbar-project-content rd-navbar-modern-project-content">
                     <div>
                       <ul class="rd-navbar-modern-contacts">
+                      <li>
+                          <div class="unit unit-spacing-sm">
+                            <div class="unit-left"><i class="icon fa-solid fa-user"></i></div>
+                            <?php
+                            echo '
+                            <div class="unit-body"><a class="link-phone" href="tel:#">'.$_SESSION["user_name"].'</a></div>
+                            '
+                             ?>
+                          </div>
+                        </li>
                         <li>
                           <div class="unit unit-spacing-sm">
                             <div class="unit-left"><span class="icon fa fa-phone"></span></div>
-                            <div class="unit-body"><a class="link-phone" href="tel:#">0365022208</a></div>
+                            <?php
+                            echo '
+                            <div class="unit-body"><a class="link-phone" href="tel:#">'.$_SESSION["phone_number"].'</a></div>
+                            '
+                             ?>
                           </div>
                         </li>
-                        <li>
-                          <div class="unit unit-spacing-sm">
-                            <div class="unit-left"><span class="icon fa fa-location-arrow"></span></div>
-                            <div class="unit-body"><a class="link-location" href="#">số nhà 14 ngõ 26, hồ tùng mậu</a></div>
-                          </div>
-                        </li>
+                        
                         <li>
                           <div class="unit unit-spacing-sm">
                             <div class="unit-left"><span class="icon fa fa-envelope"></span></div>
-                            <div class="unit-body"><a class="link-email" href="mailto:#">thangthanhthat10a3@gmail.com</a></div>
+                            <?php
+                            echo '
+                            <div class="unit-body"><a class="link-email" href="mailto:#">'.$_SESSION["email"].'</a></div>
+                            '
+                             ?>
                           </div>
                         </li>
                       </ul>
-                      <div class="oh button-wrap" ><a class="button button-primary button-ujarak slideInLeft animated" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400" style="width:100%;">Đăng xuất</a></div>
+                      <div class="oh button-wrap" ><a class="button button-primary button-ujarak slideInLeft animated" href="./app/Controller/Logout.php" data-caption-animate="slideInLeft" data-caption-delay="400" style="width:100%;">Đăng xuất</a></div>
                     </div>
                   </div>
                 </div>
@@ -160,59 +186,48 @@
         </div>
       </header>
       <!-- Swiper-->
+      <?php
+        require_once "./db.conn.php";
+        require_once "./app/Interface/IPromotion.php";
+        require_once "./app/Classes/Promotion.php";
+        $promotion = new Promotion();
+          $result = $promotion->getPromotion();
+          if(count($result) > 0){
+       ?>
       <section class="section swiper-container swiper-slider swiper-slider-modern" data-loop="true" data-autoplay="5000" data-simulate-touch="true" data-nav="true" data-slide-effect="fade" id="KM">
         <div class="swiper-wrapper text-left">
-          <div class="swiper-slide context-dark" data-slide-bg="https://i.pinimg.com/564x/20/c4/e2/20c4e2c9635b21854c251d1237c6a94a.jpg">
-            <div class="swiper-slide-caption">
-              <div class="container">
-                <div class="row justify-content-center justify-content-xxl-start">
-                  <div class="col-md-10 col-xxl-6">
-                    <div class="slider-modern-box">
-                      <h1 class="slider-modern-title"><span data-caption-animate="slideInDown" data-caption-delay="0">Organic Food</span></h1>
-                      <p data-caption-animate="fadeInRight" data-caption-delay="400">Herber provides local citizens and guests of our town with quality organic fruits, vegetables, and other products.</p>
-                      <div class="oh button-wrap"><button type="button" class="btn btn-primary button button-primary button-ujarak" data-bs-toggle="modal" data-bs-target="#exampleModal" data-caption-animate="slideInLeft" data-caption-delay="400">
-  Xem thêm
-</button></div>
+          <?php
+          
+          
+          $index = 1;
+          foreach($result as $item){
+            echo '
+            <div class="swiper-slide context-dark" data-slide-bg="./images/'.$index.'.jpg">
+              <div class="swiper-slide-caption">
+                <div class="container">
+                  <div class="row justify-content-center justify-content-xxl-start">
+                    <div class="col-md-10 col-xxl-6">
+                      <div class="slider-modern-box">
+                        <h1 class="slider-modern-title"><span data-caption-animate="slideInLeft" data-caption-delay="0"style = "font-size:100px; font-family: "Segoe UI";">'.$item['promotion_name'].'</span></h1>
+                        <p data-caption-animate="fadeInRight" data-caption-delay="400" style = "font-size:20px;">'.$item["description"].'</p>
+                        <div class="oh button-wrap" style="cursor: auto;"><p class=" button-primary button-ujarak"  data-caption-animate="slideInLeft" data-caption-delay="400" style="padding:10px;">
+                          '."Từ ngày ".$item["start_date"]." đến ngày ".$item["end_date"].'
+                        </ơ></div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="swiper-slide context-dark" data-slide-bg="https://img1.kienthucvui.vn/uploads/2021/02/12/hinh-anh-hat-ca-phe-dep_045436966.jpg">
-            <div class="swiper-slide-caption">
-              <div class="container">
-                <div class="row justify-content-center justify-content-xxl-start">
-                  <div class="col-md-10 col-xxl-6">
-                    <div class="slider-modern-box">
-                      <h1 class="slider-modern-title"><span data-caption-animate="slideInLeft" data-caption-delay="0">Quality Control</span></h1>
-                      <p data-caption-animate="fadeInRight" data-caption-delay="400">We control the process of farming at Herber to deliver the best organic products to our customers throughout the state.</p>
-                      <div class="oh button-wrap"><button type="button" class="btn btn-primary button button-primary button-ujarak" data-bs-toggle="modal" data-bs-target="#exampleModal" data-caption-animate="slideInLeft" data-caption-delay="400">
-  Xem thêm
-</button></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="swiper-slide" data-slide-bg="https://toplist.vn/images/800px/ga-9-food-819299.jpg">
-            <div class="swiper-slide-caption">
-              <div class="container">
-                <div class="row justify-content-center justify-content-xxl-start">
-                  <div class="col-md-10 col-xxl-6">
-                    <div class="slider-modern-box">
-                      <h1 class="slider-modern-title"><span data-caption-animate="slideInDown" data-caption-delay="0">Khuyến mãi tháng 12</span></h1>
-                      <p data-caption-animate="fadeInRight" data-caption-delay="400">As the leading organic farm, we maintain an eco-friendly policy of growing and selling healthy food without any additives.</p>
-                      <div class="oh button-wrap"><button type="button" class="btn btn-primary button button-primary button-ujarak" data-bs-toggle="modal" data-bs-target="#exampleModal" data-caption-animate="slideInLeft" data-caption-delay="400">
-  Xem thêm
-</button></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+            ';
+            $index++;
+            if($index > 3){
+              $index = 1;
+            }
+          }
+           ?>
+           
+           </div>
         </div>
         <!-- Swiper Navigation-->
         <div class="swiper-button-prev"></div>
@@ -220,24 +235,10 @@
         <!-- Swiper Pagination-->
         <div class="swiper-pagination swiper-pagination-style-2"></div>
       </section>
+      <?php  
+          }
+            ?>
 
-      <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="exampleModalLabel">Khuyến mãi tháng 12</h3>
-      </div>
-      <div class="modal-body">
-        <h4>Mô tả</h4>
-        <h4>Ngày bắt đầu - ngày kết thúc</h4>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
       <!-- Icons Ruby-->
       <section class="section section-md bg-default section-top-image" id="SP">
         <div class="container">
@@ -249,7 +250,7 @@
                     <div class="box-icon-ruby-icon linearicons-coffee-cup"></div>
                   </div>
                   <div class="unit-body">
-                    <h4 class="box-icon-ruby-title"><a href="#">Đồ uống</a></h4>
+                    <h4 class="box-icon-ruby-title"><a href="#DoUong">Đồ uống</a></h4>
                   </div>
                 </div>
               </article>
@@ -261,7 +262,7 @@
                   <div class="box-icon-ruby-icon linearicons-hamburger"></div>
                   </div>
                   <div class="unit-body">
-                    <h4 class="box-icon-ruby-title"><a href="#">Đồ ăn</a></h4>
+                    <h4 class="box-icon-ruby-title"><a href="#DoAn">Đồ ăn</a></h4>
                   </div>
                 </div>
               </article>
@@ -273,7 +274,7 @@
                   <div class="box-icon-ruby-icon linearicons-happy"></div>
                   </div>
                   <div class="unit-body">
-                    <h4 class="box-icon-ruby-title"><a href="feedback.php">Đánh giá</a></h4>
+                    <h4 class="box-icon-ruby-title"><a href="./feedback.php">Đánh giá</a></h4>
                   </div>
                 </div>
               </article>
@@ -286,11 +287,11 @@
       <section class="section section-md bg-default">
         <div class="container">
           <div class="row row-40 justify-content-center">
-            <div class="col-sm-8 col-md-7 col-lg-6 wow fadeInLeft" data-wow-delay="0s">
+            <div class="col-sm-8 col-md-7 col-lg-6 wow fadeInLeft" data-wow-delay="0s" id="DoUong">
               <div class="product-banner"><img src="images/home-banner-1-570x715.jpg" alt="" width="570" height="715"/>
                 <div class="product-banner-content">
                   <div class="product-banner-inner" style="background-image: url(images/bg-brush.png)">
-                    <h3 class="text-secondary-1">organic</h3>
+                    <h3 class="text-secondary-1" >organic</h3>
                     <h2 class="text-primary">Vegetables</h2>
                   </div>
                 </div>
@@ -392,12 +393,123 @@
               <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="lstTea.php" data-caption-animate="slideInLeft" data-caption-delay="400" style="width: 100%;">Xem thêm</a></div>
             </div>
           </div>
+
+          <div class="row row-40 justify-content-center">
+
+          <div class="col-md-5 col-lg-6">
+              <div class="row row-30 justify-content-center">
+                <div class="col-sm-6 col-md-12 col-lg-6">
+                  <div class="oh-desktop">
+                    <!-- Product-->
+                    <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
+                      <div class="unit flex-row flex-lg-column">
+                        <div class="unit-left">
+                          <div class="product-figure"><img src="images/product-5-270x280.png" alt="" width="270" height="280"/>
+                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
+                          </div>
+                        </div>
+                        <div class="unit-body">
+                          <h6 class="product-title"><a href="#">Avocados</a></h6>
+                          <div class="product-price-wrap">
+                            <div class="product-price product-price-old">$59.00</div>
+                            <div class="product-price">$28.00</div>              
+                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
+                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
+
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-md-12 col-lg-6">
+                  <div class="oh-desktop">
+                    <!-- Product-->
+                    <article class="product product-2 box-ordered-item wow slideInLeft" data-wow-delay="0s">
+                      <div class="unit flex-row flex-lg-column">
+                        <div class="unit-left">
+                          <div class="product-figure"><img src="images/product-6-270x280.png" alt="" width="270" height="280"/>
+                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
+
+                          </div>
+                        </div>
+                        <div class="unit-body">
+                          <h6 class="product-title"><a href="#">Corn</a></h6>
+                          <div class="product-price-wrap">
+                            <div class="product-price">$27.00</div>
+                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
+                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
+
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-md-12 col-lg-6">
+                  <div class="oh-desktop">
+                    <!-- Product-->
+                    <article class="product product-2 box-ordered-item wow slideInLeft" data-wow-delay="0s">
+                      <div class="unit flex-row flex-lg-column">
+                        <div class="unit-left">
+                          <div class="product-figure"><img src="images/product-8-270x280.png" alt="" width="270" height="280"/>
+                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
+
+                          </div>
+                        </div>
+                        <div class="unit-body">
+                          <h6 class="product-title"><a href="#">Artichokes</a></h6>
+                          <div class="product-price-wrap">
+                            <div class="product-price">$23.00</div>
+                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
+                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
+
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+                <div class="col-sm-6 col-md-12 col-lg-6">
+                  <div class="oh-desktop">
+                    <!-- Product-->
+                    <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
+                      <div class="unit flex-row flex-lg-column">
+                        <div class="unit-left">
+                          <div class="product-figure"><img src="images/product-7-270x280.png" alt="" width="270" height="280"/>
+                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
+                          </div>
+                        </div>
+                        <div class="unit-body">
+                          <h6 class="product-title"><a href="#">Broccoli</a></h6>
+                          <div class="product-price-wrap">
+                            <div class="product-price">$25.00</div>
+                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
+                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              </div>
+              <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="lstTea.php" data-caption-animate="slideInLeft" data-caption-delay="400" style="width: 100%;">Xem thêm</a></div>
+            </div>
+
+            <div class="col-sm-8 col-md-7 col-lg-6 wow fadeInLeft" data-wow-delay="0s" id="DoAn">
+              <div class="product-banner"><img src="images/home-banner-1-570x715.jpg" alt="" width="570" height="715"/>
+                <div class="product-banner-content">
+                  <div class="product-banner-inner" style="background-image: url(images/bg-brush.png)">
+                    <h3 class="text-secondary-1" >organic</h3>
+                    <h2 class="text-primary">Vegetables</h2>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+          </div>
         </div>
       </section>
 
       <!-- Section CTA 2-->
       <section class="section text-center">
-        <div class="parallax-container" data-parallax-img="images/bg-parallax-1.jpg">
+        <div class="parallax-container" data-parallax-img="https://hexa.vn/wp-content/uploads/2018/10/cheering-bear_1920x1280-px-01-1.jpg">
           <div class="parallax-content section-xl section-inset-custom-1 context-dark bg-overlay-40">
             <div class="container">
               <h2 class="oh font-weight-normal"><span class="d-inline-block wow slideInDown" data-wow-delay="0s">Vị trí HERBER</span></h2>
@@ -463,7 +575,7 @@
                 <div class="oh-desktop">
                   <div class="wow slideInRight" data-wow-delay="0s">
                     <div class="footer-brand"><a href="index.html"><img src="images/logo-inverse-196x42.png" alt="" width="196" height="42"/></a></div>
-                    <p>Herber is an organic farm located in California. We offer healthy foods and products to our clients.</p>
+                    <p>Herber là một của hàng ẩm thực nằm ở Việt Nam. Chúng tôi cung cấp thực phẩm và sản phẩm tốt cho sức khỏe cho khách hàng.</p>
                     <ul class="footer-contacts d-inline-block d-md-block">
                       <li>
                         <div class="unit unit-spacing-xs">
@@ -523,9 +635,9 @@
                       <div class="col-6 col-sm-3 col-lg-6">
                         <!-- Thumbnail Classic-->
                         <article class="thumbnail thumbnail-mary">
-                          <div class="thumbnail-mary-figure"><img src="images/gallery-image-1-129x120.jpg" alt="" width="129" height="120"/>
+                          <div class="thumbnail-mary-figure"><img src="./images/1.jpg" alt="" width="129" height="120"/>
                           </div>
-                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-7-800x1200.jpg" data-lightgallery="item"><img src="images/gallery-image-1-129x120.jpg" alt="" width="129" height="120"/></a>
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="./images/1.jpg" data-lightgallery="item"><img src="images/gallery-image-1-129x120.jpg" alt="" width="129" height="120"/></a>
                           </div>
                         </article>
                       </div>
