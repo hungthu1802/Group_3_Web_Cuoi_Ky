@@ -92,22 +92,32 @@
         <!-- Comment container -->
         <div class="comment-container">
             <!-- Comment 1 -->
-            <div class="comment">
-                <p class="comment-author">John Doe</p>
-                <p class="comment-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus eu elit tincidunt hendrerit.</p>
-            </div>
-
-            <!-- Comment 2 -->
-            <div class="comment">
-                <p class="comment-author">Jane Smith</p>
-                <p class="comment-text">Vivamus sagittis mauris id hendrerit finibus. Nunc non fringilla metus. Sed vel elit vel ligula eleifend hendrerit.</p>
-            </div>
-
-            <!-- Add more comments and replies as needed -->
+            <?php
+            require_once "./db.conn.php";
+            require_once "./app/Interface/IFeedback.php";
+            require_once "./app/Classes/Feedback.php";
+            require_once "./app/Interface/IUsers.php";
+            require_once "./app/Classes/Users.php";
+            $feedback = new Feedback();
+            $lst = $feedback->getFeedback();
+            if(count($lst) == 0){
+                echo "<h2>Cửa hàng chưa có đánh giá</h2>";
+            }
+            else{
+                foreach($lst as $item){
+                    $user = new Users();
+                    $result= $user->GetUserById($item["user_id"]);
+                    echo '<div class="comment">
+                    <p class="comment-author">'.$result[0]["user_name"].'</p>
+                    <p class="comment-text">'.$item["comment"].'</p>
+                </div>';
+                }
+            }
+             ?>
         </div>
 
         <!-- Form comment -->
-        <form action="#" method="post">
+        <form action="./app/Controller/feedback.php" method="post">
             <div class="form-group">
                 <label for="comment">Bình luận:</label>
                 <textarea class="form-control" id="comment" name="comment" rows="4" required></textarea>

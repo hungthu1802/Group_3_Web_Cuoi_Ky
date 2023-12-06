@@ -104,8 +104,12 @@
                     </div>
                     <!-- RD Navbar Nav-->
                     <ul class="rd-navbar-nav">
-                      <li class="rd-nav-item"><a class="rd-nav-link" href="index.php">TRANG CHỦ</a>
+                    <?php
+                      echo '
+                      <li class="rd-nav-item active"><a class="rd-nav-link" href="index.php?id='.$_SESSION["user_id"].'">TRANG CHỦ</a>
                       </li>
+                      '
+                       ?>
                       <li class="rd-nav-item"><a class="rd-nav-link" href="index.php#KM">KHUYẾN MÃI</a>
                       </li>
                       <li class="rd-nav-item"><a class="rd-nav-link" href="index.php#SP">SẢN PHẨM</a>
@@ -211,10 +215,10 @@
                 Tổng đơn hàng
             </div>
             <div class="card-body">
-            <ol class="list-group list-group-numbered">
-                <li class="list-group-item">1.Cras justo odio  <button class="btn btn-delete">Xóa</button></li>
-                <li class="list-group-item">2.Cras justo odio <button class="btn btn-delete">Xóa</button></li>
-                <li class="list-group-item">3.Cras justo odio <button class="btn btn-delete"> Xóa</button></li>
+            <ol class="list-group list-group-numbered list-ordered" style="text-align: center;">
+                <li class="list-group-item">Cras justo odio  <button class="btn btn-delete">Xóa</button></li>
+                <li class="list-group-item">Cras justo odio <button class="btn btn-delete">Xóa</button></li>
+                <li class="list-group-item">Cras justo odio <button class="btn btn-delete"> Xóa</button></li>
             </ol>
                 <p>Tổng tiền: $100.00</p>
                 <button type="button" class="btn btn-primary">Xác nhận đơn hàng</button>

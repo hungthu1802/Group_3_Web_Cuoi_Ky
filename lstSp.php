@@ -110,8 +110,12 @@
                     </div>
                     <!-- RD Navbar Nav-->
                     <ul class="rd-navbar-nav">
-                      <li class="rd-nav-item"><a class="rd-nav-link" href="index.php">TRANG CHỦ</a>
+                    <?php
+                      echo '
+                      <li class="rd-nav-item active"><a class="rd-nav-link" href="index.php?id='.$_SESSION["user_id"].'">TRANG CHỦ</a>
                       </li>
+                      '
+                       ?>
                       <li class="rd-nav-item"><a class="rd-nav-link" href="index.php#KM">KHUYẾN MÃI</a>
                       </li>
                       <li class="rd-nav-item"><a class="rd-nav-link" href="index.php#SP">SẢN PHẨM</a>
@@ -209,7 +213,7 @@
     </div>
       
       <!-- Page Footer-->
-      <footer class="section footer-variant-2 footer-modern context-dark section-top-image section-top-image-dark" style="position: fixed; bottom: 0; right: 0; left: 0;">
+      <footer class="section footer-variant-2 footer-modern context-dark section-top-image section-top-image-dark">
         <div class="footer-variant-2-content">
           <div class="container">
             <div class="row row-40 justify-content-between">
