@@ -14,7 +14,7 @@
         public function GetUserByEmail($email, $password){
             $result = $this->db->GetByEmail($this->tablename,$email,"email");
             foreach($result as $row){
-                if($row['password'] == $password){
+                if(password_verify($password, $row["password"])){
                     session_start();
                     $_SESSION["user_name"] = $row["user_name"];
                     $_SESSION["email"] = $row["email"];
@@ -24,7 +24,9 @@
                     return 1;
                 }
                 else{
-                    echo '<script>alert("Sai mật khẩu!");</script>';
+                    echo '<script>alert("Sai mật khẩu!");
+                    window.href="login.php";
+                    </script>';
                 }
             }
         }
@@ -32,7 +34,7 @@
         public function CreateUser($user_name, $password,$email,$phone_number)
         {
             $role_id = 1;
-           $data = array('user_name'=>$user_name, 'password' => $password,'email'=> $email, 'role_id'=>$role_id,'phone_number'=>$phone_number);
+           $data = array('user_name'=>$user_name, 'password' => password_hash($password, PASSWORD_DEFAULT),'email'=> $email, 'role_id'=>$role_id,'phone_number'=>$phone_number);
            $state = $this->db->Create($this->tablename, $data);
            if($state == 1){
             session_start();
@@ -46,6 +48,11 @@
         {
             $result = $this->db->GetByEmail($this->tablename,$user_id,"user_id");
             return $result;
+        }
+
+        public function GetUserNew(){
+            $user = $this->db->getLastFood($this->tablename, "user_id");
+            return $user;
         }
     }
  ?>

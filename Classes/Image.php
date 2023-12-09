@@ -8,7 +8,12 @@ class Image implements IImage{
     }
     public function getById($food_id)
     {
-        $result = $this->db->getImage($food_id, $this->tablename,"food_id");
+        $result = $this->db->GetByEmail($this->tablename, $food_id,"food_id");
+        return $result;
+    }
+
+    public function getByColumn($food_id){
+        $result = $this->db->getByColumn($food_id, $this->tablename, "food_id");
         return $result;
     }
 
@@ -20,7 +25,7 @@ class Image implements IImage{
 
     public function deleteImage($food_id)
     {
-        
+        $this->db->Delete($this->tablename, $food_id, "food_id");
     }
 }
  ?>
