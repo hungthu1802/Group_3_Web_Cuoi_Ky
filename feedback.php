@@ -1,3 +1,6 @@
+<?php
+session_start();
+ ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -127,7 +130,11 @@
     </div>
 
     <div class="back-home" style="display: flex;justify-content: center; margin-top: 20px;">
-    <a class="btn" href="index.php">Trở về trang chủ</a>
+    <?php
+    echo '
+    <a class="btn" href="index.php?id='.$_SESSION["user_id"].'">Trở về trang chủ</a>
+    '
+     ?>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

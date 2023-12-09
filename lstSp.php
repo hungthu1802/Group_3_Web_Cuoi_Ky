@@ -50,50 +50,93 @@
                 <div class="rd-navbar-main-element">
                   <div class="rd-navbar-nav-wrap">
                     <!-- RD Navbar Basket-->
+                    <?php
+                    session_start();
+                    require_once "./db.conn.php";
+                    require_once "./app/Interface/ICartDetails.php";
+                    require_once "./app/Classes/CartDetails.php";
+                    require_once "./app/Interface/ICart.php";
+                    require_once "./app/Classes/Cart.php";
+                    require_once "./app/Interface/IFood.php";
+                    require_once "./app/Classes/Food.php";
+                    $cart = new Cart();
+                    $cart_id= $cart->getCartByID($_GET["id"])[0]["cart_id"];
+                    $cartDetails = new CartDetails();
+                    $food = new Food();
+                    $cartlstAll = $cartDetails->GetCartDetails($cart_id);
+                    $cartDetails_id = [];
+                    $cartlst = [];
+                    foreach($cartlstAll as $item){
+                      if($item["isPay"] == "N"){
+                        array_push($cartlst, $item);
+                        array_push($cartDetails_id,$item["cart_item_id"]);
+                      }
+                    }
+                    $_SESSION["cart_item_id"] = $cartDetails_id;
+                    $numberFood = count($cartlst);
+                    $sum = 0;
+                    foreach($cartlst as $item){
+                      $food_id = $item["food_id"];
+                      $foodFind = $food->getById($food_id)[0];
+                      $sum = $foodFind["price_new"]+$sum;
+                    }
+                    ?>
                     <div class="rd-navbar-basket-wrap">
-                      <button class="rd-navbar-basket fl-bigmug-line-shopping198" data-rd-navbar-toggle=".cart-inline"><span>2</span></button>
+                      <button class="rd-navbar-basket fl-bigmug-line-shopping198" data-rd-navbar-toggle=".cart-inline"><?php 
+                      echo '<span>'.$numberFood.'</span>';
+                      ?></button>
                       <div class="cart-inline">
                         <div class="cart-inline-header">
-                          <h5 class="cart-inline-title">In cart:<span> 2</span> Products</h5>
-                          <h6 class="cart-inline-title">Total price:<span> $800</span></h6>
+                          <?php
+                          echo '
+                          <h5 class="cart-inline-title">Giỏ hàng:<span>'.$numberFood.'</span> món ăn</h5>
+                          <h6 class="cart-inline-title">Tổng giá:<span>'.$sum.'</span></h6>
+                          '
+                           ?>
                         </div>
                         <div class="cart-inline-body">
-                          <div class="cart-inline-item">
-                            <div class="unit align-items-center">
-                              <div class="unit-left"><a class="cart-inline-figure" href="#"><img src="images/product-mini-1-108x100.png" alt="" width="108" height="100"/></a></div>
-                              <div class="unit-body">
-                                <h6 class="cart-inline-name"><a href="#">Blueberries</a></h6>
-                                <div>
-                                  <div class="group-xs group-inline-middle">
-                                    <div class="table-cart-stepper">
-                                      <input class="form-input" type="number" data-zeros="true" value="1" min="1" max="1000">
-                                    </div>
-                                    <h6 class="cart-inline-title">$550</h6>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="cart-inline-item">
+                          
+                          <?php
+                          
+                              foreach($cartlst as $item){
+                                $food_id = $item["food_id"];
+                                $foodFind = $food->getById($food_id)[0];
+                                echo '
+                              <div class="cart-inline-item">
                             <div class="unit align-items-center">
                               <div class="unit-left"><a class="cart-inline-figure" href="#"><img src="images/product-mini-2-108x100.png" alt="" width="108" height="100"/></a></div>
                               <div class="unit-body">
-                                <h6 class="cart-inline-name"><a href="#">Avocados</a></h6>
+                                <h6 class="cart-inline-name"><a href="#">'.$foodFind["food_name"].'</a></h6>
                                 <div>
                                   <div class="group-xs group-inline-middle">
+                                    <h6 class="cart-inline-title">'.$foodFind['price_new'].'</h6>
                                     <div class="table-cart-stepper">
-                                      <input class="form-input" type="number" data-zeros="true" value="1" min="1" max="1000">
+                                      <a class="btn button button-md button-white" href="./app/Controller/Cart.php?id='.$_GET["id"].'&delete=true&food_id='.$food_id.'">Xóa</a>
                                     </div>
-                                    <h6 class="cart-inline-title">$250</h6>
-                                    
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
+                              ';
+                              }
+                           ?>
+
+
                         </div>
                         <div class="cart-inline-footer">
-                          <div class="group-sm"><a class="button button-md button-default-outline-2 button-wapasha" href="#">Go to cart</a><a class="button button-md button-primary button-pipaluk" href="Order.php">Checkout</a></div>
+                          <?php
+                          if(count($cartlst)>0){
+                            echo '
+                          <div class="group-sm"><a class="button button-md button-primary button-pipaluk" href="Order.php?id='.$_GET["id"].'" style="width: 100%;">Checkout</a></div>
+                          ';
+                          }
+                          else{
+                            echo '
+                          <div class="group-sm"><p class="button button-md button-primary button-pipaluk" style="width: 100%;" disable>Checkout</p></div>
+                          ';
+                          }
+                           ?>
                         </div>
                       </div>
                     </div><a class="rd-navbar-basket rd-navbar-basket-mobile fl-bigmug-line-shopping198" href="#"><span>2</span></a>
@@ -110,17 +153,29 @@
                     </div>
                     <!-- RD Navbar Nav-->
                     <ul class="rd-navbar-nav">
-                    <?php
+                      <?php
                       echo '
-                      <li class="rd-nav-item active"><a class="rd-nav-link" href="index.php?id='.$_SESSION["user_id"].'">TRANG CHỦ</a>
+                      <li class="rd-nav-item"><a class="rd-nav-link" href="index.php?id='.$_GET["id"].'">TRANG CHỦ</a>
                       </li>
                       '
                        ?>
-                      <li class="rd-nav-item"><a class="rd-nav-link" href="index.php#KM">KHUYẾN MÃI</a>
+                       <?php
+                       echo '
+                      <li class="rd-nav-item"><a class="rd-nav-link" href="index.php?id='.$_GET["id"].'#KM">KHUYẾN MÃI</a>
+                       '
+                        ?>
                       </li>
-                      <li class="rd-nav-item"><a class="rd-nav-link" href="index.php#SP">SẢN PHẨM</a>
+                      <?php
+                      echo '
+                      <li class="rd-nav-item"><a class="rd-nav-link" href="index.php?id='.$_GET["id"].'#SP">SẢN PHẨM</a>
+                      '
+                       ?>
                       </li>
-                      <li class="rd-nav-item active"><a class="rd-nav-link" href="lstSp.php">ĐƠN HÀNG</a>
+                      <?php
+                      echo '
+                      <li class="rd-nav-item active"><a class="rd-nav-link" href="lstSp.php?id='.$_GET["id"].'">ĐƠN HÀNG</a>
+                      '
+                       ?>
                       </li>
                     </ul>
                   </div>
@@ -140,27 +195,40 @@
                   </div>
                   <div class="rd-navbar-project-content rd-navbar-modern-project-content">
                     <div>
-                      <ul class="rd-navbar-modern-contacts">
+                    <ul class="rd-navbar-modern-contacts">
+                      <li>
+                          <div class="unit unit-spacing-sm">
+                            <div class="unit-left"><i class="icon fa-solid fa-user"></i></div>
+                            <?php
+                            echo '
+                            <div class="unit-body"><a class="link-phone" href="tel:#">'.$_SESSION["user_name"].'</a></div>
+                            '
+                             ?>
+                          </div>
+                        </li>
                         <li>
                           <div class="unit unit-spacing-sm">
                             <div class="unit-left"><span class="icon fa fa-phone"></span></div>
-                            <div class="unit-body"><a class="link-phone" href="tel:#">0365022208</a></div>
+                            <?php
+                            echo '
+                            <div class="unit-body"><a class="link-phone" href="tel:#">'.$_SESSION["phone_number"].'</a></div>
+                            '
+                             ?>
                           </div>
                         </li>
-                        <li>
-                          <div class="unit unit-spacing-sm">
-                            <div class="unit-left"><span class="icon fa fa-location-arrow"></span></div>
-                            <div class="unit-body"><a class="link-location" href="#">số nhà 14 ngõ 26, hồ tùng mậu</a></div>
-                          </div>
-                        </li>
+                        
                         <li>
                           <div class="unit unit-spacing-sm">
                             <div class="unit-left"><span class="icon fa fa-envelope"></span></div>
-                            <div class="unit-body"><a class="link-email" href="mailto:#">thangthanhthat10a3@gmail.com</a></div>
+                            <?php
+                            echo '
+                            <div class="unit-body"><a class="link-email" href="mailto:#">'.$_SESSION["email"].'</a></div>
+                            '
+                             ?>
                           </div>
                         </li>
                       </ul>
-                      <div class="oh button-wrap" ><a class="button button-primary button-ujarak slideInLeft animated" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400" style="width:100%;">Đăng xuất</a></div>
+                      <div class="oh button-wrap" ><a class="button button-primary button-ujarak slideInLeft animated" href="./app/Controller/Logout.php" data-caption-animate="slideInLeft" data-caption-delay="400" style="width:100%;">Đăng xuất</a></div>
                     </div>
                   </div>
                 </div>
@@ -171,6 +239,7 @@
       </header>
       
 
+      <main style="height: 500px; overflow-y: scroll;">
       <div class="container mt-4">
         <p style="font-weight: 500; font-size: 50px;">Đơn hàng đã đặt</p>
 
@@ -178,39 +247,84 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th scope="col">STT</th>
                     <th scope="col">Mã đơn hàng</th>
-                    <th scope="col">Tên sản phẩm</th>
-                    <th scope="col">Số lượng</th>
+                    <th scope="col">Số lượng món ăn</th>
                     <th scope="col">Tổng tiền</th>
+                    <th scope="col">Ngày giao dự kiến</th>
                     <th scope="col">Trạng thái</th>
                     <th scope="col">Thao tác</th>
 
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Gà ủ muối</td>
-                    <td>3</td>
-                    <td>$100.00</td>
-                    <td>Chờ xác nhận</td>
+            <?php
+                    require_once "./db.conn.php";
+                    require_once "./app/Interface/IReservation.php";
+                    require_once "./app/Classes/Reservations.php";
+                    $reservation = new Reservations();
+                    $lst = $reservation->getById($_GET["id"]);
+                    $stt = 1;
+                    foreach($lst as $item){
+                      echo '
+                      <tr>
+                    <th scope="row" class="align-middle">'.$stt++.'</th>
+                    <td class="align-middle">'.$item["reservation_id"].'</td>
+                    <td class="align-middle">'.$item["num_of_food"].'</td>
+                    <td class="align-middle">$'.$item["total"].'</td>
+                    <td class="align-middle">$'.$item["order_time"].'</td>
+                      ';
+                      if($item["order_status"] == "C"){
+                        echo '
+                          <td class="d-flex align-items-center"><span style="background-color:#3c6a36; padding:10px;">Đang chờ xác nhận</span></td>
+                          ';
+                      }
+                      if($item["order_status"] == "D"){
+                        echo '
+                          <td class="d-flex align-items-center"><span style="background-color:#00FFFF; padding:10px;">Đang giao</span></td>
+                          ';
+                      }if($item["order_status"] == "R"){
+                        echo '
+                          <td class="d-flex align-items-center"><span style="background-color:#FFFF33; padding:10px;">Đã nhận hàng</span></td>
+                          ';
+                      }
+                    
+                     ?>
                     <td>
-                        <a href="Order.php" class="btn btn-change" >
-                            <i class="fa-solid fa-gear"></i>
+                        <?php
+                        if($item["order_status"] =="C"){
+                          echo '
+                        <a href="./app/Controller/Reservation.php?reservation_id='.$item["reservation_id"].'&delete=true" class="btn btn-delete-order">
+                        Huỷ đơn
                         </a>
-                        <a href="#" class="btn btn-delete-order">
-                            <i class="fa-solid fa-rectangle-xmark"></i>
+                        ';
+                        }
+                         ?>
+                            
+                        <?php
+                        if($item["order_status"] == "D"){
+                          echo '
+                          <a href="./app/Controller/Reservation.php?reservation_id='.$item["reservation_id"].'&receive=true" class="btn btn-delete-order">
+                        Đã nhận được hàng
                         </a>
-                        <a href="feedback.php" class="btn btn-feedback-order">
-                            <i class="fa-solid fa-message"></i>
+                          ';
+                        }
+                        if($item["order_status"] == "R"){
+                          echo'
+                        <a href="feedback.php?id='.$_GET["id"].'" class="btn btn btn-delete-order">Đánh giá
                         </a>
+                        ';
+                        }
+                         ?>
                     </td>
 
                 </tr>
+                <?php } ?>
                 
             </tbody>
         </table>
     </div>
+      </main>
       
       <!-- Page Footer-->
       <footer class="section footer-variant-2 footer-modern context-dark section-top-image section-top-image-dark">
@@ -221,7 +335,7 @@
                 <div class="oh-desktop">
                   <div class="wow slideInRight" data-wow-delay="0s">
                     <div class="footer-brand"><a href="index.html"><img src="images/logo-inverse-196x42.png" alt="" width="196" height="42"/></a></div>
-                    <p>Herber is an organic farm located in California. We offer healthy foods and products to our clients.</p>
+                    <p>Herber là một của hàng ẩm thực nằm ở Việt Nam. Chúng tôi cung cấp thực phẩm và sản phẩm tốt cho sức khỏe cho khách hàng.</p>
                     <ul class="footer-contacts d-inline-block d-md-block">
                       <li>
                         <div class="unit unit-spacing-xs">
@@ -281,36 +395,36 @@
                       <div class="col-6 col-sm-3 col-lg-6">
                         <!-- Thumbnail Classic-->
                         <article class="thumbnail thumbnail-mary">
-                          <div class="thumbnail-mary-figure"><img src="images/gallery-image-1-129x120.jpg" alt="" width="129" height="120"/>
+                          <div class="thumbnail-mary-figure"><img src="./images/1.jpg" alt="" width="129" height="120"/>
                           </div>
-                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-7-800x1200.jpg" data-lightgallery="item"><img src="images/gallery-image-1-129x120.jpg" alt="" width="129" height="120"/></a>
-                          </div>
-                        </article>
-                      </div>
-                      <div class="col-6 col-sm-3 col-lg-6">
-                        <!-- Thumbnail Classic-->
-                        <article class="thumbnail thumbnail-mary">
-                          <div class="thumbnail-mary-figure"><img src="images/gallery-image-2-129x120.jpg" alt="" width="129" height="120"/>
-                          </div>
-                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-8-1200x800.jpg" data-lightgallery="item"><img src="images/gallery-image-2-129x120.jpg" alt="" width="129" height="120"/></a>
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="./images/1.jpg" data-lightgallery="item"><img src="images/gallery-image-1-129x120.jpg" alt="" width="129" height="120"/></a>
                           </div>
                         </article>
                       </div>
                       <div class="col-6 col-sm-3 col-lg-6">
                         <!-- Thumbnail Classic-->
                         <article class="thumbnail thumbnail-mary">
-                          <div class="thumbnail-mary-figure"><img src="images/gallery-image-3-129x120.jpg" alt="" width="129" height="120"/>
+                          <div class="thumbnail-mary-figure"><img src="images/3.jpg" alt="" width="129" height="120"/>
                           </div>
-                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-9-800x1200.jpg" data-lightgallery="item"><img src="images/gallery-image-3-129x120.jpg" alt="" width="129" height="120"/></a>
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-8-1200x800.jpg" data-lightgallery="item"><img src="images/2.jpg" alt="" width="129" height="120"/></a>
                           </div>
                         </article>
                       </div>
                       <div class="col-6 col-sm-3 col-lg-6">
                         <!-- Thumbnail Classic-->
                         <article class="thumbnail thumbnail-mary">
-                          <div class="thumbnail-mary-figure"><img src="images/gallery-image-4-129x120.jpg" alt="" width="129" height="120"/>
+                          <div class="thumbnail-mary-figure"><img src="images/2.jpg" alt="" width="129" height="120"/>
                           </div>
-                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-10-1200x800.jpg" data-lightgallery="item"><img src="images/gallery-image-4-129x120.jpg" alt="" width="129" height="120"/></a>
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-9-800x1200.jpg" data-lightgallery="item"><img src="images/3.jpg" alt="" width="129" height="120"/></a>
+                          </div>
+                        </article>
+                      </div>
+                      <div class="col-6 col-sm-3 col-lg-6">
+                        <!-- Thumbnail Classic-->
+                        <article class="thumbnail thumbnail-mary">
+                          <div class="thumbnail-mary-figure"><img src="images/2.jpg" alt="" width="129" height="120"/>
+                          </div>
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-10-1200x800.jpg" data-lightgallery="item"><img src="images/2.jpg" alt="" width="129" height="120"/></a>
                           </div>
                         </article>
                       </div>

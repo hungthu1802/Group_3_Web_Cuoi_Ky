@@ -1,3 +1,6 @@
+<?php
+session_start();
+ ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -89,13 +92,29 @@
                     </div>
                     <!-- RD Navbar Nav-->
                     <ul class="rd-navbar-nav">
-                      <li class="rd-nav-item active"><a class="rd-nav-link" href="index.php">TRANG CHỦ</a>
+                      <?php
+                      echo '
+                      <li class="rd-nav-item active"><a class="rd-nav-link" href="index.php?id='.$_SESSION["user_id"].'">TRANG CHỦ</a>
                       </li>
-                      <li class="rd-nav-item"><a class="rd-nav-link" href="index.php#KM">KHUYẾN MÃI</a>
+                      '
+                       ?>
+                       <?php
+                       echo '
+                      <li class="rd-nav-item"><a class="rd-nav-link" href="?id='.$_GET["id"].'#KM">KHUYẾN MÃI</a>
+                       '
+                        ?>
                       </li>
-                      <li class="rd-nav-item"><a class="rd-nav-link" href="index.php#SP">SẢN PHẨM</a>
+                      <?php
+                      echo '
+                      <li class="rd-nav-item"><a class="rd-nav-link" href="?id='.$_GET["id"].'#SP">SẢN PHẨM</a>
+                      '
+                       ?>
                       </li>
-                      <li class="rd-nav-item"><a class="rd-nav-link" href="Order.php">ĐƠN HÀNG</a>
+                      <?php
+                      echo '
+                      <li class="rd-nav-item"><a class="rd-nav-link" href="lstSp.php?id='.$_GET["id"].'">ĐƠN HÀNG</a>
+                      '
+                       ?>
                       </li>
                     </ul>
                   </div>
@@ -146,202 +165,226 @@
       </header>
 <section class="section section-md bg-default">
         <div class="container">
-          <div class="row row-40 justify-content-center">
-          <div class="col-md-5 col-lg-6">
-              <div class="row row-30 justify-content-center">
-                <div class="col-sm-6 col-md-12 col-lg-6">
+          <div class="row row-40">
+          <div class="col-md-12  col-lg-12">
+          <div class="row">
+                <?php
+                require_once "./db.conn.php";
+                require_once "./app/Interface/IFood.php";
+                require_once "./app/Classes/Food.php";
+                require_once "./app/Interface/IPromotion.php";
+                require_once "./app/Classes/Promotion.php";
+                $food = new Food();
+                $foods = $food->getByMenu($_GET["menu_id"]);    
+                $numoffood = count($foods);   
+                $numfoodinPage= 4;
+                $totalPages = ceil($numoffood/$numfoodinPage);
+                $currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
+
+                $start = ($currentPage - 1)*$numfoodinPage;
+                $end = $start + $numfoodinPage;
+
+                for($i = $start; $i < $end; $i++){
+                  if($i > $numoffood-1){
+                    break;
+                  }
+                  $food = $foods[$i];
+                $promotion = new Promotion();
+                $km= $promotion->getPromotionById($food["promotion_id"]);
+                  echo '
+                  <div class="col-sm-6 col-md-3 mb-3">
                   <div class="oh-desktop">
                     <!-- Product-->
                     <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
                       <div class="unit flex-row flex-lg-column">
                         <div class="unit-left">
                           <div class="product-figure"><img src="images/product-5-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
+                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="./app/Controller/Cart.php?id='.$_GET["id"].'&food_id='.$food["food_id"].'&create=true">Add to cart</a></div>
                           </div>
                         </div>
                         <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Avocados</a></h6>
+                          <h6 class="product-title"><a href="#">'.$food["food_name"].'</a></h6>
                           <div class="product-price-wrap">
-                            <div class="product-price product-price-old">$59.00</div>
-                            <div class="product-price">$28.00</div>              
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
+                          ';
+                          if(count($km)> 0){
+                            echo '
+                          <div class="product-price product-price-old">'.$food["price"].'</div>
+                            <div class="product-price">'.$food["price_new"].'</div> 
+                            ';
+                          }
+                          else{
+                            echo '
+                          <div class="product-price">'.$food["price"].'</div>
+                            ';
+                          }
+                    echo'             
+                          </div><a class="button button-sm button-secondary button-ujarak" href="./app/Controller/Cart.php?id='.$_GET["id"].'&food_id='.$food["food_id"].'&create=true">Add to cart</a>
+                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="#ImageMA" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
 
                         </div>
                       </div>
                     </article>
                   </div>
                 </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInLeft" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-6-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
+                  ';
+                }
+                 ?>
+                
 
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <?php
+
+// Hàm để tạo URL với trang đã chọn
+function getPageUrl($page) {
+    return '?id='.$_SESSION["user_id"].'&page='.$page.'';
+}
+
+// Hàm để tạo danh sách nút phân trang
+function generatePagination($totalPages, $currentPage) {
+    echo '<ul class="pagination justify-content-center" style="padding-top:40px">';
+    
+    // Nút "Previous"
+    if ($currentPage > 1) {
+        echo '<li class="page-item"><a class="page-link" href="' . getPageUrl($currentPage - 1) . '">Previous</a></li>';
+    }
+
+    // Danh sách nút phân trang
+    for ($i = 1; $i <= $totalPages; $i++) {
+        echo '<li class="page-item' . ($i == $currentPage ? ' active' : '') . '"><a class="page-link" href="' . getPageUrl($i) . '">' . $i . '</a></li>';
+    }
+
+    // Nút "Next"
+    if ($currentPage < $totalPages) {
+        echo '<li class="page-item"><a class="page-link" href="' . getPageUrl($currentPage + 1) . '">Next</a></li>';
+    }
+
+    echo '</ul>';
+}
+
+// Gọi hàm để tạo danh sách nút phân trang
+generatePagination($totalPages, $currentPage);
+
+?>
+
+      </section>
+
+      <script src="js/core.min.js"></script>
+    <script src="js/script.js"></script>
+
+    <footer class="section footer-variant-2 footer-modern context-dark section-top-image section-top-image-dark">
+        <div class="footer-variant-2-content">
+          <div class="container">
+            <div class="row row-40 justify-content-between">
+              <div class="col-sm-6 col-lg-4 col-xl-3">
+                <div class="oh-desktop">
+                  <div class="wow slideInRight" data-wow-delay="0s">
+                    <div class="footer-brand"><a href="index.html"><img src="images/logo-inverse-196x42.png" alt="" width="196" height="42"/></a></div>
+                    <p>Herber là một của hàng ẩm thực nằm ở Việt Nam. Chúng tôi cung cấp thực phẩm và sản phẩm tốt cho sức khỏe cho khách hàng.</p>
+                    <ul class="footer-contacts d-inline-block d-md-block">
+                      <li>
+                        <div class="unit unit-spacing-xs">
+                          <div class="unit-left"><span class="icon fa fa-phone"></span></div>
+                          <div class="unit-body"><a class="link-phone" href="tel:0365022208">+84 365022208</a></div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="unit unit-spacing-xs">
+                          <div class="unit-left"><span class="icon fa fa-clock-o"></span></div>
+                          <div class="unit-body">
+                            <p>Mon-Sat: 07:00AM - 05:00PM</p>
                           </div>
                         </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Corn</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$27.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-
+                      </li>
+                      <li>
+                        <div class="unit unit-spacing-xs">
+                          <div class="unit-left"><span class="icon fa fa-location-arrow"></span></div>
+                          <div class="unit-body"><a class="link-location" href="#">Số nhà 14, ngõ 26, Mai Dịch, Cầu Giấy, Hà Nội</a></div>
                         </div>
-                      </div>
-                    </article>
-                  </div>
-                </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInLeft" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-8-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
-
-                          </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Artichokes</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$23.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-
-                        </div>
-                      </div>
-                    </article>
-                  </div>
-                </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-7-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
-                          </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Broccoli</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$25.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-                        </div>
-                      </div>
-                    </article>
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="col-md-5 col-lg-6">
-              <div class="row row-30 justify-content-center">
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-5-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
-                          </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Avocados</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price product-price-old">$59.00</div>
-                            <div class="product-price">$28.00</div>              
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-
-                        </div>
+              <div class="col-sm-6 col-lg-4 col-xl-4">
+                <div class="oh-desktop">
+                  <div class="inset-top-18 wow slideInDown" data-wow-delay="0s">
+                    <h5>Newsletter</h5>
+                    <p>Join our email newsletter for news and tips.</p>
+                    <form class="rd-form rd-mailform" data-form-output="form-output-global" data-form-type="subscribe" method="post" action="bat/rd-mailform.php">
+                      <div class="form-wrap">
+                        <input class="form-input" id="subscribe-form-5-email" type="email" name="email" data-constraints="@Email @Required">
+                        <label class="form-label" for="subscribe-form-5-email">Enter Your E-mail</label>
                       </div>
-                    </article>
+                      <button class="button button-block button-white" type="submit">Subscribe</button>
+                    </form>
+                    <div class="group-lg group-middle">
+                      <p class="text-white">Follow Us</p>
+                      <div>
+                        <ul class="list-inline list-inline-sm footer-social-list-2">
+                          <li><a class="icon fa fa-facebook" href="#"></a></li>
+                          <li><a class="icon fa fa-twitter" href="#"></a></li>
+                          <li><a class="icon fa fa-google-plus" href="#"></a></li>
+                          <li><a class="icon fa fa-instagram" href="#"></a></li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInLeft" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-6-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
-
+              </div>
+              <div class="col-lg-3 col-xl-3">
+                <div class="oh-desktop">
+                  <div class="inset-top-18 wow slideInLeft" data-wow-delay="0s">
+                    <h5>Gallery</h5>
+                    <div class="row row-10 gutters-10" data-lightgallery="group">
+                      <div class="col-6 col-sm-3 col-lg-6">
+                        <!-- Thumbnail Classic-->
+                        <article class="thumbnail thumbnail-mary">
+                          <div class="thumbnail-mary-figure"><img src="./images/1.jpg" alt="" width="129" height="120"/>
                           </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Corn</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$27.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-
-                        </div>
-                      </div>
-                    </article>
-                  </div>
-                </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInLeft" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-8-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
-
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="./images/1.jpg" data-lightgallery="item"><img src="images/gallery-image-1-129x120.jpg" alt="" width="129" height="120"/></a>
                           </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Artichokes</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$23.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-
-                        </div>
+                        </article>
                       </div>
-                    </article>
-                  </div>
-                </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-7-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
+                      <div class="col-6 col-sm-3 col-lg-6">
+                        <!-- Thumbnail Classic-->
+                        <article class="thumbnail thumbnail-mary">
+                          <div class="thumbnail-mary-figure"><img src="images/3.jpg" alt="" width="129" height="120"/>
                           </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Broccoli</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$25.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-                        </div>
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-8-1200x800.jpg" data-lightgallery="item"><img src="images/2.jpg" alt="" width="129" height="120"/></a>
+                          </div>
+                        </article>
                       </div>
-                    </article>
+                      <div class="col-6 col-sm-3 col-lg-6">
+                        <!-- Thumbnail Classic-->
+                        <article class="thumbnail thumbnail-mary">
+                          <div class="thumbnail-mary-figure"><img src="images/2.jpg" alt="" width="129" height="120"/>
+                          </div>
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-9-800x1200.jpg" data-lightgallery="item"><img src="images/3.jpg" alt="" width="129" height="120"/></a>
+                          </div>
+                        </article>
+                      </div>
+                      <div class="col-6 col-sm-3 col-lg-6">
+                        <!-- Thumbnail Classic-->
+                        <article class="thumbnail thumbnail-mary">
+                          <div class="thumbnail-mary-figure"><img src="images/2.jpg" alt="" width="129" height="120"/>
+                          </div>
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-10-1200x800.jpg" data-lightgallery="item"><img src="images/2.jpg" alt="" width="129" height="120"/></a>
+                          </div>
+                        </article>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
-      <script src="js/core.min.js"></script>
-    <script src="js/script.js"></script>
-
-    <footer class="section footer-variant-2 footer-modern context-dark section-top-image section-top-image-dark">
+        
+      </footer>
         <div class="footer-variant-2-content">
           <div class="container">
             <div class="row row-40 justify-content-between">
