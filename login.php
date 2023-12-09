@@ -27,7 +27,7 @@
                 <input type="password" placeholder="Password" name="password" />
                 <a href="#">Quên mật khẩu?</a>
                 <button>Đăng nhập</button>
-                <a href="./admin/Login.php">Đăng nhập tài khoản admin</a>
+                <a href="./admin/Login.php?isAdmin=true">Đăng nhập tài khoản admin</a>
             </form>
         </div>
         <div class="overlay-container">
