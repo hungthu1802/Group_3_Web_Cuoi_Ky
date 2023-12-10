@@ -17,22 +17,27 @@ class Food implements IFood{
         return $result;
     }
 
+    public function getByMenu($menu_id){
+        $result = $this->db->getByColumn($menu_id,$this->tablename, "menu_id");
+        return $result;
+    }
+
     public function getById($food_id)
     {
         $result = $this->db->GetByEmail($this->tablename, $food_id, "food_id");
         return $result;
     }
 
-    public function addFood($menu_id, $promotion_id, $food_name, $price)
+    public function addFood($menu_id, $promotion_id, $food_name, $price, $price_new)
     {
-        $data = array('menu_id'=> $menu_id, "promotion_id"=>$promotion_id, "food_name"=>$food_name,"price"=>$price);
+        $data = array('menu_id'=> $menu_id, "promotion_id"=>$promotion_id, "food_name"=>$food_name,"price"=>$price, "price_new"=>$price_new);
         $this->db->Create($this->tablename, $data);
         header("Location: ../../admin/index.php");
     }
 
-    public function updateFood($food_id, $menu_id, $promotion_id, $food_name, $price)
+    public function updateFood($food_id, $menu_id, $promotion_id, $food_name, $price, $price_new)
     {
-        $data = array('menu_id'=> $menu_id, "promotion_id"=>$promotion_id, "food_name"=>$food_name,"price"=>$price);
+        $data = array('menu_id'=> $menu_id, "promotion_id"=>$promotion_id, "food_name"=>$food_name,"price"=>$price, "price_new" => $price_new);
         $this->db->Update($this->tablename, $data,$food_id,"food_id");
     }
 

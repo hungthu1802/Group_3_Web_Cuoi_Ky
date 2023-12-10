@@ -84,9 +84,33 @@ class dbModel{
                 die("Lỗi thêm dữ liệu vào bảng: ".$e->getMessage());
             }
     }
+
+    public function UpdateState($tablename, $data, $id, $columname, $id2, $columname2){
+        try{
+            $array = [];
+            foreach($data as $key => $value){
+                $nameSet = "$key = :$key";
+                array_push($array, $nameSet);
+            }
+            $columns = implode(', ', $array);
+            $sql = "UPDATE $tablename SET $columns  WHERE $columname = :id AND $columname2 = :id2";
+            $stmt = $this->db->prepare($sql);
+        
+            foreach ($data as $key => $value) {
+                $stmt->bindValue(":$key", $value);
+            }
+            $stmt->bindValue(':id', $id);
+            $stmt->bindValue(':id2', $id2);
+            $stmt->execute();
+            
+            }
+            catch(PDOException $e){
+                die("Lỗi thêm dữ liệu vào bảng: ".$e->getMessage());
+            }
+    }
     public function Delete($tablename, $id, $columname){
         try{
-            $sql = "DELETE FROM $tablename WHERE $columname = :id";
+            $sql = "DELETE FROM $tablename WHERE $columname = :id LIMIT 1";
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id', $id);
             $stmt->execute();
@@ -96,10 +120,10 @@ class dbModel{
         }
     }
 
-    public function getImage($food_id, $tablename, $columname){
+    public function getByColumn($id, $tablename, $columname){
         try{
-            $food_id= trim($food_id);
-            $sql = "SELECT * FROM $tablename WHERE $columname = '$food_id";
+            $id= trim($id);
+            $sql = "SELECT * FROM $tablename WHERE $columname = '$id'";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -126,5 +150,6 @@ class dbModel{
             echo "Lỗi:".$e->getMessage();
         }
     }
+
 }
  ?>

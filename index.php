@@ -29,6 +29,14 @@ if (!isset($_SESSION['user_name'])) {
     <![endif]-->
   </head>
   <body>
+    <style>
+      .cart-inline-body {
+	      max-height: 400px;
+	      overflow: scroll;
+	      padding: 20px;
+	      border-top: 1px solid #f1efeb;
+      }
+    </style>
     <div class="preloader">
       <div class="preloader-body">
         <div class="cssload-container"><span></span><span></span><span></span><span></span>
@@ -53,50 +61,92 @@ if (!isset($_SESSION['user_name'])) {
                 <div class="rd-navbar-main-element">
                   <div class="rd-navbar-nav-wrap">
                     <!-- RD Navbar Basket-->
+                    <?php
+                    require_once "./db.conn.php";
+                    require_once "./app/Interface/ICartDetails.php";
+                    require_once "./app/Classes/CartDetails.php";
+                    require_once "./app/Interface/ICart.php";
+                    require_once "./app/Classes/Cart.php";
+                    require_once "./app/Interface/IFood.php";
+                    require_once "./app/Classes/Food.php";
+                    $cart = new Cart();
+                    $cart_id= $cart->getCartByID($_GET["id"])[0]["cart_id"];
+                    $cartDetails = new CartDetails();
+                    $food = new Food();
+                    $cartlstAll = $cartDetails->GetCartDetails($cart_id);
+                    $cartDetails_id = [];
+                    $cartlst = [];
+                    foreach($cartlstAll as $item){
+                      if($item["isPay"] == "N"){
+                        array_push($cartlst, $item);
+                        array_push($cartDetails_id,$item["cart_item_id"]);
+                      }
+                    }
+                    $_SESSION["cart_item_id"] = $cartDetails_id;
+                    $numberFood = count($cartlst);
+                    $sum = 0;
+                    foreach($cartlst as $item){
+                      $food_id = $item["food_id"];
+                      $foodFind = $food->getById($food_id)[0];
+                      $sum = $foodFind["price_new"]+$sum;
+                    }
+                    ?>
                     <div class="rd-navbar-basket-wrap">
-                      <button class="rd-navbar-basket fl-bigmug-line-shopping198" data-rd-navbar-toggle=".cart-inline"><span>2</span></button>
+                      <button class="rd-navbar-basket fl-bigmug-line-shopping198" data-rd-navbar-toggle=".cart-inline"><?php 
+                      echo '<span>'.$numberFood.'</span>';
+                      ?></button>
                       <div class="cart-inline">
                         <div class="cart-inline-header">
-                          <h5 class="cart-inline-title">In cart:<span> 2</span> Products</h5>
-                          <h6 class="cart-inline-title">Total price:<span> $800</span></h6>
+                          <?php
+                          echo '
+                          <h5 class="cart-inline-title">Giỏ hàng:<span>'.$numberFood.'</span> món ăn</h5>
+                          <h6 class="cart-inline-title">Tổng giá:<span>'.$sum.'</span></h6>
+                          '
+                           ?>
                         </div>
                         <div class="cart-inline-body">
-                          <div class="cart-inline-item">
-                            <div class="unit align-items-center">
-                              <div class="unit-left"><a class="cart-inline-figure" href="#"><img src="images/product-mini-1-108x100.png" alt="" width="108" height="100"/></a></div>
-                              <div class="unit-body">
-                                <h6 class="cart-inline-name"><a href="#">Blueberries</a></h6>
-                                <div>
-                                  <div class="group-xs group-inline-middle">
-                                    <div class="table-cart-stepper">
-                                      <input class="form-input" type="number" data-zeros="true" value="1" min="1" max="1000">
-                                    </div>
-                                    <h6 class="cart-inline-title">$550</h6>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="cart-inline-item">
+                          
+                          <?php
+                          
+                              foreach($cartlst as $item){
+                                $food_id = $item["food_id"];
+                                $foodFind = $food->getById($food_id)[0];
+                                echo '
+                              <div class="cart-inline-item">
                             <div class="unit align-items-center">
                               <div class="unit-left"><a class="cart-inline-figure" href="#"><img src="images/product-mini-2-108x100.png" alt="" width="108" height="100"/></a></div>
                               <div class="unit-body">
-                                <h6 class="cart-inline-name"><a href="#">Avocados</a></h6>
+                                <h6 class="cart-inline-name"><a href="#">'.$foodFind["food_name"].'</a></h6>
                                 <div>
                                   <div class="group-xs group-inline-middle">
+                                    <h6 class="cart-inline-title">'.$foodFind['price_new'].'</h6>
                                     <div class="table-cart-stepper">
-                                      <input class="form-input" type="number" data-zeros="true" value="1" min="1" max="1000">
+                                      <a class="btn button button-md button-white" href="./app/Controller/Cart.php?id='.$_GET["id"].'&delete=true&food_id='.$food_id.'">Xóa</a>
                                     </div>
-                                    <h6 class="cart-inline-title">$250</h6>
-                                    
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
+                              ';
+                              }
+                           ?>
+
+
                         </div>
                         <div class="cart-inline-footer">
-                          <div class="group-sm"><a class="button button-md button-primary button-pipaluk" href="Order.php" style="width: 100%;">Checkout</a></div>
+                          <?php
+                          if(count($cartlst)>0){
+                            echo '
+                          <div class="group-sm"><a class="button button-md button-primary button-pipaluk" href="Order.php?id='.$_GET["id"].'" style="width: 100%;">Checkout</a></div>
+                          ';
+                          }
+                          else{
+                            echo '
+                          <div class="group-sm"><p class="button button-md button-primary button-pipaluk" style="width: 100%;" disable>Checkout</p></div>
+                          ';
+                          }
+                           ?>
                         </div>
                       </div>
                     </div><a class="rd-navbar-basket rd-navbar-basket-mobile fl-bigmug-line-shopping198" href="#"><span>2</span></a>
@@ -107,6 +157,14 @@ if (!isset($_SESSION['user_name'])) {
                         <div class="form-wrap">
                           <label class="form-label" for="rd-navbar-search-form-input">Search...</label>
                           <input class="rd-navbar-search-form-input form-input" id="rd-navbar-search-form-input" type="text" name="search">
+                          <input class="rd-navbar-search-form-input form-input" id="user_id" type="text" name="id" style="display: none;">
+                          <?php
+                          echo '
+                          <script>
+                            document.getElementById("user_id").value = "'.$_SESSION["user_id"].'"
+                          </script>
+                          '
+                           ?>
                           <button class="rd-search-form-submit fl-bigmug-line-search74" type="submit"></button>
                         </div>
                       </form>
@@ -119,11 +177,23 @@ if (!isset($_SESSION['user_name'])) {
                       </li>
                       '
                        ?>
-                      <li class="rd-nav-item"><a class="rd-nav-link" href="#KM">KHUYẾN MÃI</a>
+                       <?php
+                       echo '
+                      <li class="rd-nav-item"><a class="rd-nav-link" href="?id='.$_GET["id"].'#KM">KHUYẾN MÃI</a>
+                       '
+                        ?>
                       </li>
-                      <li class="rd-nav-item"><a class="rd-nav-link" href="#SP">SẢN PHẨM</a>
+                      <?php
+                      echo '
+                      <li class="rd-nav-item"><a class="rd-nav-link" href="?id='.$_GET["id"].'#SP">SẢN PHẨM</a>
+                      '
+                       ?>
                       </li>
-                      <li class="rd-nav-item"><a class="rd-nav-link" href="lstSp.php">ĐƠN HÀNG</a>
+                      <?php
+                      echo '
+                      <li class="rd-nav-item"><a class="rd-nav-link" href="lstSp.php?id='.$_GET["id"].'">ĐƠN HÀNG</a>
+                      '
+                       ?>
                       </li>
                     </ul>
                   </div>
@@ -288,109 +358,82 @@ if (!isset($_SESSION['user_name'])) {
         <div class="container">
           <div class="row row-40 justify-content-center">
             <div class="col-sm-8 col-md-7 col-lg-6 wow fadeInLeft" data-wow-delay="0s" id="DoUong">
-              <div class="product-banner"><img src="images/home-banner-1-570x715.jpg" alt="" width="570" height="715"/>
+              <div class="product-banner"><img src="https://khothietke.net/wp-content/uploads/2021/03/freefile062-coc-tra-chanh-nuoc-chanh-da-2.jpg" alt="" width="570" height="715"/>
                 <div class="product-banner-content">
-                  <div class="product-banner-inner" style="background-image: url(images/bg-brush.png)">
-                    <h3 class="text-secondary-1" >organic</h3>
-                    <h2 class="text-primary">Vegetables</h2>
+                  <div class="product-banner-inner">
+                    <h3 class="text-secondary-1" ></h3>
+                    <h2 class="text-primary"></h2>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col-md-5 col-lg-6">
               <div class="row row-30 justify-content-center">
-                <div class="col-sm-6 col-md-12 col-lg-6">
+                <?php
+                require_once "./db.conn.php";
+                require_once "./app/Interface/IFood.php";
+                require_once "./app/Classes/Food.php";
+                require_once "./app/Interface/IPromotion.php";
+                require_once "./app/Classes/Promotion.php";
+                require_once "./app/Interface/IImage.php";
+                require_once "./app/Classes/Image.php";
+                $food = new Food();
+                $image = new Image();
+                $foods = $food->getByMenu(1);                
+                for($i = 0; $i < count($foods); $i++){
+                  if($i > 3){
+                    break;
+                  }
+                  else $food = $foods[$i];
+                $promotion = new Promotion();
+                $km= $promotion->getPromotionById($food["promotion_id"]);
+                $imageFood = $image->getById($food["food_id"])[0];
+                  echo '
+                  <div class="col-sm-6 col-md-12 col-lg-6">
                   <div class="oh-desktop">
                     <!-- Product-->
                     <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
                       <div class="unit flex-row flex-lg-column">
                         <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-5-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
+                          <div class="product-figure"><img src="images/'.$imageFood["image_url"].'" alt="" width="270" height="280"/>
+                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="./app/Controller/Cart.php?id='.$_GET["id"].'&food_id='.$food["food_id"].'&create=true">Add to cart</a></div>
                           </div>
                         </div>
                         <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Avocados</a></h6>
+                          <h6 class="product-title"><a href="#">'.$food["food_name"].'</a></h6>
                           <div class="product-price-wrap">
-                            <div class="product-price product-price-old">$59.00</div>
-                            <div class="product-price">$28.00</div>              
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
+                          ';
+                          if(count($km)> 0){
+                            echo '
+                          <div class="product-price product-price-old">'.$food["price"].'</div>
+                            <div class="product-price">'.$food["price_new"].'</div> 
+                            ';
+                          }
+                          else{
+                            echo '
+                          <div class="product-price">'.$food["price"].'</div>
+                            ';
+                          }
+                    echo'             
+                          </div><a class="button button-sm button-secondary button-ujarak" href="./app/Controller/Cart.php?id='.$_GET["id"].'&food_id='.$food["food_id"].'&create=true">Add to cart</a>
+                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="#imageMA" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
 
                         </div>
                       </div>
                     </article>
                   </div>
                 </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInLeft" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-6-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
+                  ';
+                }
+                 ?>
+                
 
-                          </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Corn</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$27.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-
-                        </div>
-                      </div>
-                    </article>
-                  </div>
-                </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInLeft" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-8-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
-
-                          </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Artichokes</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$23.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-
-                        </div>
-                      </div>
-                    </article>
-                  </div>
-                </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-7-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
-                          </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Broccoli</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$25.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-                        </div>
-                      </div>
-                    </article>
-                  </div>
-                </div>
               </div>
-              <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="lstTea.php" data-caption-animate="slideInLeft" data-caption-delay="400" style="width: 100%;">Xem thêm</a></div>
+              <?php
+              echo '
+              <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="lstTea.php?id='.$_SESSION["user_id"].'&menu_id=1" data-caption-animate="slideInLeft" data-caption-delay="400" style="width: 100%;">Xem thêm</a></div>
+              ';
+               ?>
             </div>
           </div>
 
@@ -398,106 +441,72 @@ if (!isset($_SESSION['user_name'])) {
 
           <div class="col-md-5 col-lg-6">
               <div class="row row-30 justify-content-center">
-                <div class="col-sm-6 col-md-12 col-lg-6">
+                
+              <?php
+                $food = new Food();
+                $image = new Image();
+                $foods = $food->getByMenu(2);                
+                for($i = 0; $i < count($foods); $i++){
+                  if($i > 3){
+                    break;
+                  }
+                  else $food = $foods[$i];
+                $promotion = new Promotion();
+                $km= $promotion->getPromotionById($food["promotion_id"]);
+                $imageFood = $image->getById($food["food_id"])[0];
+                  echo '
+                  <div class="col-sm-6 col-md-12 col-lg-6">
                   <div class="oh-desktop">
                     <!-- Product-->
                     <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
                       <div class="unit flex-row flex-lg-column">
                         <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-5-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
+                          <div class="product-figure"><img src="images/'.$imageFood["image_url"].'" alt="" width="270" height="280"/>
+                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="./app/Controller/Cart.php?id='.$_GET["id"].'&food_id='.$food["food_id"].'&create=true">Add to cart</a></div>
                           </div>
                         </div>
                         <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Avocados</a></h6>
+                          <h6 class="product-title"><a href="#">'.$food["food_name"].'</a></h6>
                           <div class="product-price-wrap">
-                            <div class="product-price product-price-old">$59.00</div>
-                            <div class="product-price">$28.00</div>              
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
+                          ';
+                          if(count($km)> 0){
+                            echo '
+                          <div class="product-price product-price-old">'.$food["price"].'</div>
+                            <div class="product-price">'.$food["price_new"].'</div> 
+                            ';
+                          }
+                          else{
+                            echo '
+                          <div class="product-price">'.$food["price"].'</div>
+                            ';
+                          }
+                    echo'             
+                          </div><a class="button button-sm button-secondary button-ujarak" href="./app/Controller/Cart.php?id='.$_GET["id"].'&food_id='.$food["food_id"].'&create=true">Add to cart</a>
+                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="#imageMA" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
 
                         </div>
                       </div>
                     </article>
                   </div>
                 </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInLeft" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-6-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
-
-                          </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Corn</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$27.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-
-                        </div>
-                      </div>
-                    </article>
-                  </div>
-                </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInLeft" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-8-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
-
-                          </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Artichokes</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$23.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-
-                        </div>
-                      </div>
-                    </article>
-                  </div>
-                </div>
-                <div class="col-sm-6 col-md-12 col-lg-6">
-                  <div class="oh-desktop">
-                    <!-- Product-->
-                    <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
-                      <div class="unit flex-row flex-lg-column">
-                        <div class="unit-left">
-                          <div class="product-figure"><img src="images/product-7-270x280.png" alt="" width="270" height="280"/>
-                            <div class="product-button"><a class="button button-md button-white button-ujarak" href="#">Add to cart</a></div>
-                          </div>
-                        </div>
-                        <div class="unit-body">
-                          <h6 class="product-title"><a href="#">Broccoli</a></h6>
-                          <div class="product-price-wrap">
-                            <div class="product-price">$25.00</div>
-                          </div><a class="button button-sm button-secondary button-ujarak" href="#">Add to cart</a>
-                          <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="about-us.html" data-caption-animate="slideInLeft" data-caption-delay="400">Xem ảnh</a></div>
-                        </div>
-                      </div>
-                    </article>
-                  </div>
-                </div>
+                  ';
+                }
+                 ?>
+                
               </div>
-              <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="lstTea.php" data-caption-animate="slideInLeft" data-caption-delay="400" style="width: 100%;">Xem thêm</a></div>
+              <?php
+              echo '
+              <div class="oh button-wrap"><a class="button button-primary button-ujarak" href="lstTea.php?id='.$_SESSION["user_id"].'&menu_id=2" data-caption-animate="slideInLeft" data-caption-delay="400" style="width: 100%;">Xem thêm</a></div>
+              ';
+               ?>
             </div>
 
             <div class="col-sm-8 col-md-7 col-lg-6 wow fadeInLeft" data-wow-delay="0s" id="DoAn">
-              <div class="product-banner"><img src="images/home-banner-1-570x715.jpg" alt="" width="570" height="715"/>
+              <div class="product-banner"><img src="https://manhhoach.com/wp-content/uploads/2019/12/Thuong-Hieu-25-Nam-V1-copy-min.jpg" alt="" width="570" height="715"/>
                 <div class="product-banner-content">
-                  <div class="product-banner-inner" style="background-image: url(images/bg-brush.png)">
-                    <h3 class="text-secondary-1" >organic</h3>
-                    <h2 class="text-primary">Vegetables</h2>
+                  <div class="product-banner-inner">
+                    <h3 class="text-secondary-1" ></h3>
+                    <h2 class="text-primary"></h2>
                   </div>
                 </div>
               </div>
@@ -524,47 +533,84 @@ if (!isset($_SESSION['user_name'])) {
       <section class="section section-md bg-default section-top-image">
         <div class="container">
           <div class="oh h2-title">
-            <h2 class="wow slideInUp" data-wow-delay="0s">Trà chanh</h2>
-          </div>
-          <div class="row row-30" data-lightgallery="group">
-            <div class="col-sm-6 col-lg-4">
-              <div class="oh-desktop">
-                <!-- Thumbnail Classic-->
-                <article class="thumbnail thumbnail-mary thumbnail-sm wow slideInLeft" data-wow-delay="0s">
-                  <div class="thumbnail-mary-figure"><img src="images/grid-gallery-1-370x303.jpg" alt="" width="370" height="303"/>
-                  </div>
-                  <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-1-1200x800.jpg" data-lightgallery="item"><img src="images/grid-gallery-1-370x303.jpg" alt="" width="370" height="303"/></a>
-                    <h4 class="thumbnail-mary-title"><a href="#">Watermelons</a></h4>
-                  </div>
-                </article>
+            <?php
+            $food = new Food();
+            $image = new Image();
+            $lstFood = $food->getAll();
+            $numoffood = count($lstFood);   
+            $numfoodinPage= 4;
+            $totalPages = ceil($numoffood/$numfoodinPage);
+            $currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
+            $start = ($currentPage - 1)*$numfoodinPage;
+            $end = $start + $numfoodinPage;
+            for($i = $start; $i < $end; $i++){
+              if($i > $numoffood - 1){
+                break;
+              }
+              $item = $lstFood[$i];
+              $lstImage = $image->getByColumn($item["food_id"]);
+              echo '
+              <h2 class="wow slideInUp" data-wow-delay="0s" id="imageMA">'.$item["food_name"].'</h2>
               </div>
-            </div>
-            <div class="col-sm-6 col-lg-4">
-              <div class="oh-desktop">
-                <!-- Thumbnail Classic-->
-                <article class="thumbnail thumbnail-mary thumbnail-sm wow slideInUp" data-wow-delay=".1s">
-                  <div class="thumbnail-mary-figure"><img src="images/grid-gallery-2-370x303.jpg" alt="" width="370" height="303"/>
+              <div class="row row-30" data-lightgallery="group">';
+              foreach($lstImage as $imageItem){
+                echo'
+                <div class="col-sm-6 col-lg-4">
+                  <div class="oh-desktop">
+                    <!-- Thumbnail Classic-->
+                    <article class="thumbnail thumbnail-mary thumbnail-sm wow slideInLeft" data-wow-delay="0s">
+                      <div class="thumbnail-mary-figure"><img src="images/'.$imageItem["image_url"].'" alt="" width="370" height="303"/>
+                      </div>
+                      <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/'.$imageItem["image_url"].'" data-lightgallery="item"><img src="images/'.$imageItem["image_url"].'" alt="" width="370" height="303"/></a>
+                        <h4 class="thumbnail-mary-title"><a href="#"></a></h4>
+                      </div>
+                    </article>
                   </div>
-                  <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-2-1200x800.jpg" data-lightgallery="item"><img src="images/grid-gallery-2-370x303.jpg" alt="" width="370" height="303"/></a>
-                    <h4 class="thumbnail-mary-title"><a href="#">Grapes</a></h4>
-                  </div>
-                </article>
-              </div>
-            </div>
-            <div class="col-sm-6 col-lg-4">
-              <div class="oh-desktop">
-                <!-- Thumbnail Classic-->
-                <article class="thumbnail thumbnail-mary thumbnail-sm wow slideInRight" data-wow-delay=".0s">
-                  <div class="thumbnail-mary-figure"><img src="images/grid-gallery-3-370x303.jpg" alt="" width="370" height="303"/>
-                  </div>
-                  <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-3-800x1200.jpg" data-lightgallery="item"><img src="images/grid-gallery-3-370x303.jpg" alt="" width="370" height="303"/></a>
-                    <h4 class="thumbnail-mary-title"><a href="#">Mandarin Oranges</a></h4>
-                  </div>
-                </article>
-              </div>
-            </div>
+                </div>
+              ';
+              }
+
+            }
+            ?>
+            
           </div>
         </div>
+
+        <?php
+
+// Hàm để tạo URL với trang đã chọn
+function getPageUrl($page) {
+  $id = $_SESSION["user_id"];
+    return "?id=$id&page=$page";
+}
+
+// Hàm để tạo danh sách nút phân trang
+function generatePagination($totalPages, $currentPage) {
+    echo '<ul class="pagination justify-content-center" style="margin-top:40px;">';
+    
+    // Nút "Previous"
+    if ($currentPage > 1) {
+        echo '<li class="page-item"><a class="page-link" href="' . getPageUrl($currentPage - 1) . '">Previous</a></li>';
+    }
+
+    // Danh sách nút phân trang
+    for ($i = 1; $i <= $totalPages; $i++) {
+        echo '<li class="page-item' . ($i == $currentPage ? ' active' : '') . '"><a class="page-link" href="' . getPageUrl($i) . '">' . $i . '</a></li>';
+    }
+
+    // Nút "Next"
+    if ($currentPage < $totalPages) {
+        echo '<li class="page-item"><a class="page-link" href="' . getPageUrl($currentPage + 1) . '">Next</a></li>';
+    }
+
+    echo '</ul>';
+}
+
+// Gọi hàm để tạo danh sách nút phân trang
+generatePagination($totalPages, $currentPage);
+
+?>
+
       </section>
       <!-- Page Footer-->
       <footer class="section footer-variant-2 footer-modern context-dark section-top-image section-top-image-dark">
@@ -644,27 +690,27 @@ if (!isset($_SESSION['user_name'])) {
                       <div class="col-6 col-sm-3 col-lg-6">
                         <!-- Thumbnail Classic-->
                         <article class="thumbnail thumbnail-mary">
-                          <div class="thumbnail-mary-figure"><img src="images/gallery-image-2-129x120.jpg" alt="" width="129" height="120"/>
+                          <div class="thumbnail-mary-figure"><img src="images/3.jpg" alt="" width="129" height="120"/>
                           </div>
-                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-8-1200x800.jpg" data-lightgallery="item"><img src="images/gallery-image-2-129x120.jpg" alt="" width="129" height="120"/></a>
-                          </div>
-                        </article>
-                      </div>
-                      <div class="col-6 col-sm-3 col-lg-6">
-                        <!-- Thumbnail Classic-->
-                        <article class="thumbnail thumbnail-mary">
-                          <div class="thumbnail-mary-figure"><img src="images/gallery-image-3-129x120.jpg" alt="" width="129" height="120"/>
-                          </div>
-                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-9-800x1200.jpg" data-lightgallery="item"><img src="images/gallery-image-3-129x120.jpg" alt="" width="129" height="120"/></a>
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-8-1200x800.jpg" data-lightgallery="item"><img src="images/2.jpg" alt="" width="129" height="120"/></a>
                           </div>
                         </article>
                       </div>
                       <div class="col-6 col-sm-3 col-lg-6">
                         <!-- Thumbnail Classic-->
                         <article class="thumbnail thumbnail-mary">
-                          <div class="thumbnail-mary-figure"><img src="images/gallery-image-4-129x120.jpg" alt="" width="129" height="120"/>
+                          <div class="thumbnail-mary-figure"><img src="images/2.jpg" alt="" width="129" height="120"/>
                           </div>
-                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-10-1200x800.jpg" data-lightgallery="item"><img src="images/gallery-image-4-129x120.jpg" alt="" width="129" height="120"/></a>
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-9-800x1200.jpg" data-lightgallery="item"><img src="images/3.jpg" alt="" width="129" height="120"/></a>
+                          </div>
+                        </article>
+                      </div>
+                      <div class="col-6 col-sm-3 col-lg-6">
+                        <!-- Thumbnail Classic-->
+                        <article class="thumbnail thumbnail-mary">
+                          <div class="thumbnail-mary-figure"><img src="images/2.jpg" alt="" width="129" height="120"/>
+                          </div>
+                          <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/gallery-original-10-1200x800.jpg" data-lightgallery="item"><img src="images/" alt="" width="129" height="120"/></a>
                           </div>
                         </article>
                       </div>

@@ -10,14 +10,30 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 $user = new Users();
 $state = $user->GetUserByEmail($email, $password);
 if($state == 1){
-    if(isset($_GET["isAdmin"])&& $_SESSION["role_id"]==2){
-        header("Location: ../../admin/index.php?id=".$_SESSION["user_id"]);
-    }
-    else if($_SESSION["role_id"]==2){
-        header("Location: ../../login.php?id=".$_SESSION["user_id"]);
+    if(isset($_GET["isAdmin"])){
+        if($_SESSION["role_id"]==2){
+            header("Location: ../../admin/index.php?id=".$_SESSION["user_id"]);
+        }
+        else{
+            header("Location: ../../admin/login.php?");
+        }
     }
     else{
-        header("Location: ../../index.php?id=".$_SESSION["user_id"]);
+        if($_SESSION["role_id"]==1){
+            header("Location: ../../index.php?id=".$_SESSION["user_id"]);
+        }
+        else{
+            header("Location: ../../login.php?id=".$_SESSION["user_id"]);
+        }
     }
 }
+else{
+    if(isset($_GET["isAdmin"])){
+        header("Location: ../../admin/login.php?");
+    }
+    else{
+        header("Location: ../../login.php?id=".$_SESSION["user_id"]);
+    }
+}
+
  ?>
