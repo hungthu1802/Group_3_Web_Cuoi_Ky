@@ -192,7 +192,7 @@
       <input type="date" class="form-control" id="endDate" required name="end_date">
     </div>
     <button type="submit" class="btn btn-primary">Thêm khuyến mãi</button>
-    <button  class="btn btn-secondary">Hủy</button>
+    <a  class="button btn btn-secondary" href="./promotion.php">Hủy</a>
   </form>
       </div>
     </section>

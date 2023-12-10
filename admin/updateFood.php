@@ -90,7 +90,7 @@
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
           <li class="nav-item menu-open">
-            <a href="#" class="nav-link">
+            <a href="#" class="nav-link active">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>
                 Quản lý món ăn
@@ -105,14 +105,13 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="./addProduct.php" class="nav-link">
+                <a href="./addProduct.php" class="nav-link active">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Thêm món ăn</p>
                 </a>
               </li>
             </ul>
           </li>
-
           <li class="nav-item menu-open">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -137,7 +136,7 @@
             </ul>
           </li>
           <li class="nav-item">
-            <a href="./Order.php" class="nav-link active">
+            <a href="./Order.php" class="nav-link">
               <i class="nav-icon fas fa-th"></i>
               <p>
                 Quản lý đơn hàng
@@ -160,7 +159,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0">Quản lý đơn hàng</h1>
+            <h1 class="m-0">Cập nhật món ăn</h1>
           </div><!-- /.col -->
           
         </div><!-- /.row -->
@@ -171,96 +170,94 @@
     <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
-
-      <main style="height: 500px; overflow-y: scroll;">
-      <div class="container-fluid">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">STT</th>
-                    <th scope="col">Mã đơn hàng</th>
-                    <th scope="col">Tên món ăn</th>
-                    <th scope="col">Số lượng món ăn</th>
-                    <th scope="col">Tổng tiền</th>
-                    <th scope="col">Ngày đặt</th>
-                    <th scope="col">Trạng thái</th>
-                    <th scope="col">Thao tác</th>
-
-                </tr>
-            </thead>
-            <tbody>
-            <?php
-                    require_once "../db.conn.php";
-                    require_once "../app/Interface/IReservation.php";
-                    require_once "../app/Classes/Reservations.php";
-                    require_once "../app/Interface/ICartDetails.php";
-                    require_once "../app/Classes/CartDetails.php";
-                    require_once "../app/Interface/IFood.php";
-                    require_once "../app/Classes/Food.php";
-                    $reservation = new Reservations();
-                    $history = new CartDetails();
-                    $food = new Food();
-                    $lst = $reservation->getAll();
-                    $stt = 1;
-                    foreach($lst as $item){
-                      $hsr = $history->GetCartByRe($item["reservation_id"]);
-                      echo '
-                      <tr>
-                    <th scope="row">'.$stt++.'</th>
-                    <td>'.$item["reservation_id"].'</td>
-                    ';?>
-                    <td>
-                    <?php
-                    foreach($hsr as $fooditem){
-                        $foodFind = $food->getById($fooditem["food_id"])[0];
-                        echo '<span>- '.$foodFind["food_name"].'</span><br>';
-                    }
-                    ?>
-                    </td>
-                    <?php
-                    echo'
-                    <td>'.$item["num_of_food"].'</td>
-                    <td>$'.$item["total"].'</td>
-                    <td>$'.$item["order_date"].'</td>
-                      ';
-                      if($item["order_status"] == "C"){
-                        echo '
-                          <td style="color:#3c6a36;">Chờ xác nhận</td>
-                          ';
-                      }
-                      if($item["order_status"] == "D"){
-                        echo '
-                          <td style="color:#00FFFF;">Đang giao hàng</td>
-                          ';
-                      }if($item["order_status"] == "R"){
-                        echo '
-                          <td style="color:#FFFF33;">Đã nhận hàng</td>
-                          ';
-                      }
-                    
-                     ?>
-                    <td>
-                      <link rel="stylesheet" href="">
-                        <?php
-                        if($item["order_status"] == "C")
-                        echo '
-                        <button class="button btn-primary" style"color:#fff;"><a href="../app/Controller/Reservation.php?reservation_id='.$item["reservation_id"].'&confirm=true" style="color:#fff;">Xác nhận</a></button>
-                        ';
-                        else{
-                          echo'
-                        <button class="btn btn-secondary" disabled>Xác nhận</button>
-                          ';
-                        }
-                         ?>
-                    </td>
-
-                </tr>
-                <?php } ?>
-                
-            </tbody>
-        </table>
+        <?php
+        echo '
+      <form action="../app/Controller/food.php?" method="get">
+        '
+         ?>
+         <input type="hidden" name="id" value="<?php echo $_GET['id']; ?>">
+    <input type="hidden" name="update" value="true">
+    <div class="mb-3">
+      <label for="tenMonAn" class="form-label">Tên món ăn</label>
+      <input type="text" class="form-control" id="tenMonAn"  required name="food_name">
     </div>
-      </main>
+    <div class="mb-3">
+    <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="foodType" class="form-label">Chọn loại món ăn:</label>
+      <select class="form-select" id="foodType" name="menu_id">
+        <?php
+        require_once "../db.conn.php";
+        require_once "../app/Interface/IMenu.php";
+        require_once "../app/Classes/Menu.php";
+
+        $menu = new Menu();
+        $result = $menu->GetAll();
+        foreach($result as $item){
+          echo '
+          <option value="'.$item["menu_id"].'">'.$item["menu_name"].'</option>
+          ';
+        }
+         ?>
+      </select>
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <label for="drinkType" class="form-label">Chọn loại khuyến mãi:</label>
+      <select class="form-select" id="promotiontype" name="promotion_id">
+      <?php
+      require_once "../app/Interface/IPromotion.php";
+      require_once "../app/Classes/Promotion.php";
+      $promotion = new Promotion();
+      $result = $promotion->getPromotion();
+      if(count($result) == 0){
+        echo '
+        <option value="0">Không áp khuyến mãi</option>
+        ';
+      }
+      else{
+        echo '
+        <option value="0" selected>Không áp khuyến mãi</option>
+        ';
+        foreach($result as $item){
+          echo '
+          <option value="'.$item["promotion_id"].'">'.$item["promotion_name"].'</option>
+        ';
+        }
+      }
+      
+       ?>
+       </select>
+    </div>
+  </div>
+    </div>
+    <div class="mb-3">
+      <label for="gia" class="form-label">Giá</label>
+      <input type="text" class="form-control" id="gia" required name="price">
+    </div>
+    <button type="submit" class="btn btn-primary">Cập nhật món ăn</button>
+    <button  class="btn btn-secondary">Hủy</button>
+  </form>
+  <?php
+  if(isset($_GET["update"])){
+    require_once "../db.conn.php";
+    require_once "../app/Interface/IFood.php";
+    require_once "../app/Classes/Food.php";
+    $food_id = $_GET["id"];
+    $food = new Food();
+    $item = $food->getById($food_id);
+    if($item){
+        echo '
+    <script>
+    document.getElementById("tenMonAn").value = "'.$item[0]["food_name"].'";
+    document.getElementById("foodType").value = "'.$item[0]["menu_id"].'";
+    document.getElementById("promotiontype").value = "'.$item[0]["promotion_id"].'";
+    document.getElementById("gia").value = "'.$item[0]["price"].'";
+    </script>
+    ';
+    }
+  }
+   ?>
       </div>
     </section>
     <!-- /.content -->
@@ -274,7 +271,7 @@
   </aside>
   <!-- /.control-sidebar -->
 </div>
-<!-- ../wrapper -->
+<!-- ./wrapper -->
 
 <!-- jQuery -->
 <script src="plugins/jquery/jquery.min.js"></script>

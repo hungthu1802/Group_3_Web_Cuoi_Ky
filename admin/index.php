@@ -191,13 +191,16 @@
       require_once "../app/Classes/Menu.php";
       require_once "../app/Interface/IPromotion.php";
       require_once "../app/Classes/Promotion.php";
+      require_once "../app/Interface/ICartDetails.php";
+      require_once "../app/Classes/CartDetails.php";
       $food = new Food();
       $result = $food->getAll();
       foreach($result as $item){
         $menu = new Menu();
         $menu_name = $menu->GetByID($item["menu_id"])[0];
         $promotion = new Promotion();
-        
+        $cartDetails = new CartDetails();
+        $isPay = $cartDetails->GetCartByFood($item["food_id"]);
           $saleoff = $promotion->getPromotionById($item["promotion_id"]);
           if($saleoff){
         $price = $saleoff[0]["saleoff"] * $item["price"];
@@ -208,8 +211,16 @@
         <td>'.$menu_name["menu_name"].'</td>
         <td>'.$price.'</td>
         <td>
-          <button type="button" class="btn btn-warning">Sửa</button>
-          <button type="button" class="btn btn-danger">Xóa</button>
+          <a type="button" class="btn btn-warning" href= "../admin/updateFood.php?id='.$item["food_id"].'&update=true">Sửa</a>';
+          if($isPay){
+            echo '
+          <a type="button" class="btn btn-secondary" href= "#">Xóa</a>';
+          }
+          else{
+            echo '
+          <a type="button" class="btn btn-danger" href= "../app/Controller/food.php?id='.$item["food_id"].'&delete=true">Xóa</a>';
+          }
+          echo '
         </td>
       </tr>
         ';
@@ -222,8 +233,16 @@
         <td>'.$menu_name["menu_name"].'</td>
         <td>'.$item["price"].'</td>
         <td>
-          <button type="button" class="btn btn-warning">Sửa</button>
-          <button type="button" class="btn btn-danger">Xóa</button>
+        <a type="button" class="btn btn-warning" href= "../admin/updateFood.php?id='.$item["food_id"].'&update=true">Sửa</a>';
+        if($isPay){
+          echo '
+        <a type="button" class="btn btn-secondary" href= "#">Xóa</a>';
+        }
+        else{
+          echo '
+        <a type="button" class="btn btn-danger" href= "../app/Controller/food.php?id='.$item["food_id"].'&delete=true">Xóa</a>';
+        }
+        echo '
         </td>
       </tr>
         ';

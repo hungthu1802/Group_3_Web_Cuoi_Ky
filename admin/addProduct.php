@@ -235,7 +235,7 @@
       <input type="file" id="gia" required name="files[]" multiple>
     </div>
     <button type="submit" class="btn btn-primary">Thêm món ăn</button>
-    <button  class="btn btn-secondary">Hủy</button>
+    <a  class="button btn btn-secondary" href="./index.php">Hủy</a>
   </form>
       </div>
     </section>
