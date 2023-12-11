@@ -107,14 +107,17 @@ if (!isset($_SESSION['user_name'])) {
                         <div class="cart-inline-body">
                           
                           <?php
-                          
+                          require_once "./app/Interface/IImage.php";
+                          require_once "./app/Classes/Image.php";
+                                $image = new Image();
                               foreach($cartlst as $item){
                                 $food_id = $item["food_id"];
                                 $foodFind = $food->getById($food_id)[0];
+                                $imageFood = $image->getById($foodFind["food_id"])[0];
                                 echo '
                               <div class="cart-inline-item">
                             <div class="unit align-items-center">
-                              <div class="unit-left"><a class="cart-inline-figure" href="#"><img src="images/product-mini-2-108x100.png" alt="" width="108" height="100"/></a></div>
+                              <div class="unit-left"><a class="cart-inline-figure" href="#"><img src="images/'.$imageFood["image_url"].'" alt="" style="width: 108px;, height:100px;"/></a></div>
                               <div class="unit-body">
                                 <h6 class="cart-inline-name"><a href="#">'.$foodFind["food_name"].'</a></h6>
                                 <div>
@@ -153,21 +156,23 @@ if (!isset($_SESSION['user_name'])) {
                     <!-- RD Navbar Search-->
                     <div class="rd-navbar-search">
                       <button class="rd-navbar-search-toggle" data-rd-navbar-toggle=".rd-navbar-search"><span></span></button>
-                      <form class="rd-search" action="#">
+                      <form class="rd-search" action="./app/Controller/Search.php" method="post">
                         <div class="form-wrap">
                           <label class="form-label" for="rd-navbar-search-form-input">Search...</label>
                           <input class="rd-navbar-search-form-input form-input" id="rd-navbar-search-form-input" type="text" name="search">
                           <input class="rd-navbar-search-form-input form-input" id="user_id" type="text" name="id" style="display: none;">
-                          <?php
-                          echo '
-                          <script>
-                            document.getElementById("user_id").value = "'.$_SESSION["user_id"].'"
-                          </script>
-                          '
-                           ?>
+                          
                           <button class="rd-search-form-submit fl-bigmug-line-search74" type="submit"></button>
                         </div>
                       </form>
+                      <?php
+
+                          echo '
+                          <script>
+                            document.getElementById("user_id").value = "'.$_GET["id"].'"
+                          </script>
+                          '
+                           ?>
                     </div>
                     <!-- RD Navbar Nav-->
                     <ul class="rd-navbar-nav">
@@ -389,13 +394,13 @@ if (!isset($_SESSION['user_name'])) {
                 $km= $promotion->getPromotionById($food["promotion_id"]);
                 $imageFood = $image->getById($food["food_id"])[0];
                   echo '
-                  <div class="col-sm-6 col-md-12 col-lg-6">
+                  <div class="col-sm-6 col-md-12 col-lg-6" id='.$food["food_id"].'>
                   <div class="oh-desktop">
                     <!-- Product-->
                     <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
                       <div class="unit flex-row flex-lg-column">
                         <div class="unit-left">
-                          <div class="product-figure"><img src="images/'.$imageFood["image_url"].'" alt="" width="270" height="280"/>
+                          <div class="product-figure"><img src="images/'.$imageFood["image_url"].'" alt="" style="width:270px; height:266px; background-image:center;"/>
                             <div class="product-button"><a class="button button-md button-white button-ujarak" href="./app/Controller/Cart.php?id='.$_GET["id"].'&food_id='.$food["food_id"].'&create=true">Add to cart</a></div>
                           </div>
                         </div>
@@ -455,13 +460,13 @@ if (!isset($_SESSION['user_name'])) {
                 $km= $promotion->getPromotionById($food["promotion_id"]);
                 $imageFood = $image->getById($food["food_id"])[0];
                   echo '
-                  <div class="col-sm-6 col-md-12 col-lg-6">
+                  <div class="col-sm-6 col-md-12 col-lg-6" id="'.$food["food_id"].'">
                   <div class="oh-desktop">
                     <!-- Product-->
                     <article class="product product-2 box-ordered-item wow slideInRight" data-wow-delay="0s">
                       <div class="unit flex-row flex-lg-column">
                         <div class="unit-left">
-                          <div class="product-figure"><img src="images/'.$imageFood["image_url"].'" alt="" width="270" height="280"/>
+                          <div class="product-figure"><img src="images/'.$imageFood["image_url"].'" alt="" style="width:270px; height:266px;"/>
                             <div class="product-button"><a class="button button-md button-white button-ujarak" href="./app/Controller/Cart.php?id='.$_GET["id"].'&food_id='.$food["food_id"].'&create=true">Add to cart</a></div>
                           </div>
                         </div>
@@ -559,7 +564,7 @@ if (!isset($_SESSION['user_name'])) {
                   <div class="oh-desktop">
                     <!-- Thumbnail Classic-->
                     <article class="thumbnail thumbnail-mary thumbnail-sm wow slideInLeft" data-wow-delay="0s">
-                      <div class="thumbnail-mary-figure"><img src="images/'.$imageItem["image_url"].'" alt="" width="370" height="303"/>
+                      <div class="thumbnail-mary-figure"><img src="images/'.$imageItem["image_url"].'" alt="" style="width:370px; height:240px;"/>
                       </div>
                       <div class="thumbnail-mary-caption"><a class="icon fl-bigmug-line-zoom60" href="images/'.$imageItem["image_url"].'" data-lightgallery="item"><img src="images/'.$imageItem["image_url"].'" alt="" width="370" height="303"/></a>
                         <h4 class="thumbnail-mary-title"><a href="#"></a></h4>
@@ -730,6 +735,26 @@ generatePagination($totalPages, $currentPage);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <script src="js/core.min.js"></script>
     <script src="js/script.js"></script>
+    <script>
+    // Chờ tài liệu được tải xong
+    document.addEventListener("DOMContentLoaded", function() {
+        // Lấy fragment (đoạn #28) từ URL
+        var fragment = window.location.hash;
+      console.log(fragment);
+        // Kiểm tra xem fragment có tồn tại
+        if (fragment) {
+          var id = fragment.substring(1);
+          console.log(id)
+            // Cuộn đến vị trí có id là fragment
+            var element = document.getElementById(`${id}`); 
+            console.log(element);
+            if (element) {
+              console.log("haha");
+                element.scrollIntoView();
+            }
+        }
+    });
+</script>
     <!-- coded by Ragnar-->
   </body>
 </html>
