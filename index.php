@@ -36,6 +36,7 @@ if (!isset($_SESSION['user_name'])) {
 	      padding: 20px;
 	      border-top: 1px solid #f1efeb;
       }
+
     </style>
     <div class="preloader">
       <div class="preloader-body">
@@ -110,8 +111,19 @@ if (!isset($_SESSION['user_name'])) {
                           require_once "./app/Interface/IImage.php";
                           require_once "./app/Classes/Image.php";
                                 $image = new Image();
+                              $arr_id = [];
                               foreach($cartlst as $item){
-                                $food_id = $item["food_id"];
+                                array_push($arr_id, $item["food_id"]);
+                              }
+                              $arr_id = array_unique($arr_id);
+                              foreach($arr_id as $item){
+                              $numberKey=0;
+                                foreach($cartlst as $cart){
+                                    if($item == $cart["food_id"]){
+                                      $numberKey++;
+                                    }
+                                }
+                                $food_id = $item;
                                 $foodFind = $food->getById($food_id)[0];
                                 $imageFood = $image->getById($foodFind["food_id"])[0];
                                 echo '
@@ -123,8 +135,10 @@ if (!isset($_SESSION['user_name'])) {
                                 <div>
                                   <div class="group-xs group-inline-middle">
                                     <h6 class="cart-inline-title">'.$foodFind['price_new'].'</h6>
-                                    <div class="table-cart-stepper">
-                                      <a class="btn button button-md button-white" href="./app/Controller/Cart.php?id='.$_GET["id"].'&delete=true&food_id='.$food_id.'">Xóa</a>
+                                    <div class="table-cart-stepper" style="display:flex;">
+                                    <a class="" style="padding:10px;background-color:#ccc;" href="./app/Controller/Cart.php?id='.$_GET["id"].'&delete=true&food_id='.$food_id.'">-</a>
+                                    <span class"numberFood" style="padding:0 10px;display:flex; align-items:center;">'.$numberKey.'</span>
+                                    <a style="padding:10px;background-color:#ccc;" href="./app/Controller/Cart.php?id='.$_GET["id"].'&create=true&food_id='.$food_id.'">+</a>
                                     </div>
                                   </div>
                                 </div>
