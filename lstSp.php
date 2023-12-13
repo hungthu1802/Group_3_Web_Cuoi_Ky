@@ -59,6 +59,8 @@
                     require_once "./app/Classes/Cart.php";
                     require_once "./app/Interface/IFood.php";
                     require_once "./app/Classes/Food.php";
+                    require_once "./app/Interface/IImage.php";
+                    require_once "./app/Classes/Image.php";
                     $cart = new Cart();
                     $cart_id= $cart->getCartByID($_GET["id"])[0]["cart_id"];
                     $cartDetails = new CartDetails();
@@ -97,21 +99,37 @@
                         <div class="cart-inline-body">
                           
                           <?php
-                          
+                          require_once "./app/Interface/IImage.php";
+                          require_once "./app/Classes/Image.php";
+                                $image = new Image();
+                              $arr_id = [];
                               foreach($cartlst as $item){
-                                $food_id = $item["food_id"];
+                                array_push($arr_id, $item["food_id"]);
+                              }
+                              $arr_id = array_unique($arr_id);
+                              foreach($arr_id as $item){
+                              $numberKey=0;
+                                foreach($cartlst as $cart){
+                                    if($item == $cart["food_id"]){
+                                      $numberKey++;
+                                    }
+                                }
+                                $food_id = $item;
                                 $foodFind = $food->getById($food_id)[0];
+                                $imageFood = $image->getById($foodFind["food_id"])[0];
                                 echo '
                               <div class="cart-inline-item">
                             <div class="unit align-items-center">
-                              <div class="unit-left"><a class="cart-inline-figure" href="#"><img src="images/product-mini-2-108x100.png" alt="" width="108" height="100"/></a></div>
+                              <div class="unit-left"><a class="cart-inline-figure" href="#"><img src="images/'.$imageFood["image_url"].'" alt="" style="width: 108px;, height:100px;"/></a></div>
                               <div class="unit-body">
                                 <h6 class="cart-inline-name"><a href="#">'.$foodFind["food_name"].'</a></h6>
                                 <div>
                                   <div class="group-xs group-inline-middle">
                                     <h6 class="cart-inline-title">'.$foodFind['price_new'].'</h6>
-                                    <div class="table-cart-stepper">
-                                      <a class="btn button button-md button-white" href="./app/Controller/Cart.php?id='.$_GET["id"].'&delete=true&food_id='.$food_id.'">Xóa</a>
+                                    <div class="table-cart-stepper" style="display:flex;">
+                                    <a class="" style="padding:10px;background-color:#ccc;" href="./app/Controller/Cart.php?id='.$_GET["id"].'&delete=true&food_id='.$food_id.'">-</a>
+                                    <span class"numberFood" style="padding:0 10px;display:flex; align-items:center;">'.$numberKey.'</span>
+                                    <a style="padding:10px;background-color:#ccc;" href="./app/Controller/Cart.php?id='.$_GET["id"].'&create=true&food_id='.$food_id.'">+</a>
                                     </div>
                                   </div>
                                 </div>
@@ -258,6 +276,7 @@
                 </tr>
             </thead>
             <tbody>
+                          
             <?php
                     require_once "./db.conn.php";
                     require_once "./app/Interface/IReservation.php";
