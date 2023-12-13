@@ -1,7 +1,7 @@
 <?php
 class dbModel{
     private $db;
-    private $servername = "127.0.0.1:3307"; // Tên máy chủ MySQL
+    private $servername = "127.0.0.1"; // Tên máy chủ MySQL
     private $username = "root"; // Tên người dùng MySQL
     private $password = ""; // Mật khẩu MySQL
     private $dbname = "herber"; // Tên cơ sở dữ liệu MySQL
